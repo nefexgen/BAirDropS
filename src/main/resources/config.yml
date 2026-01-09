@@ -1,0 +1,109 @@
+# Updated v1.1.0 by Storm (Discord: stormsms)
+
+geyser: false
+max-experience-pre-generated-location: 50
+use-metrics: true
+debug: false
+log-level: LOW
+state-serializable: true
+anti-steal:
+  enable: true
+  max-interval: 5 #ms
+  max-warnings: 5
+  min-interval-to-ignore: 250 #ms
+  сooldown: 200 #ms
+
+settings:
+  world-guard-flags:
+    allow-flags:
+      - use
+      - pvp
+      - chest-access
+    deny-flags:
+      - creeper-explosion
+      - tnt
+      - fire-spread
+      - lava-fire
+      - other-explosion
+global-time:
+  enable: false
+  time: 90
+summoner-сooldown: 1200
+summoner:
+  item-1:
+    nbt: null
+    material: SOUL_CAMPFIRE
+    name: '&aAirdrop beacon'
+    lore:
+      - '&7line 1'
+      - '&7line 2'
+    airdrop: RANDOM
+    clone: true
+    use-player-location: true
+    check-up-blocks: false
+    flatness-check: false
+    ignore-region: false
+    min-y: 0
+    max-y: 0
+    call: []
+  item-2:
+    nbt: null
+    material: SOUL_CAMPFIRE
+    name: '&aAirdrop beacon'
+    lore:
+      - '&7line 1'
+      - '&7line 2'
+    airdrop: RANDOM
+    clone: true
+    flatness-check: false
+    use-player-location: false
+    ignore-region: false
+    min-y: 0
+    max-y: 0
+    call: []
+custom-crafts:
+  enable: false
+  crafts:
+    craft-1:
+      summoner: item-1
+      ingredients:
+        A: DIAMOND
+        B: BEDROCK
+      slots:
+        top: AAA
+        middle: ABA
+        bottom: AAA
+compass:
+  material: COMPASS
+  item-name: '&aCompass'
+  item-lore: '&7Points the way to the nearest airdrop.'
+  line-max-distance: 10
+  particle-step: 0.2
+  particle-color: '255:0:0'
+  particle-size: 3
+  message-not-found: '&cThere are currently no active airdrops! &7The next one will be available in %bairdrop_time_start_format%.'
+  message-found: null
+
+auto-enchant:
+  enable: false
+  en1: # Что угодно в имени
+    material: NETHERITE_PICKAXE # Материал предмета который нужно зачаровать
+    efficiency: #зачарование
+      chance: 70 #Шанс чара
+      min-level: 2 #Минимальный и максимальный уровень чара
+      max-level: 5
+    fortune:
+      chance: 30
+      min-level: 1
+      max-level: 2
+    conflict-enchant: #Конфликтующие чары
+      - silk_touch
+  en2:
+    material: NETHERITE_PICKAXE
+    silk_touch:
+      chance: 70
+      min-level: 1
+      max-level: 1
+    conflict-enchant:
+      - fortune
+      - efficiency
