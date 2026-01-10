@@ -1,0 +1,208 @@
+# You can spawn the effect before the airdrop appears, but the location must be pre-generated! The parameter "search-before-start" is responsible for that.
+effects:
+  ef=1: # Effect name. Forbidden characters: (., -)
+    type: CIRCLE # Type of effect.
+    ticks: 36000 # Lifetime in ticks (assuming you will disable the effect through an event, but if you forget to do so, the effect will automatically disable after 36000 ticks (30 minutes)). Increase if necessary.
+    timeUpdate: 10 # How often in ticks to spawn new particles.
+    radius: 1.5 # Circle radius.
+    count: 0 # Number of particles. Set to 0 to prevent particle dispersion, or you can experiment with this value to achieve an unusual effect.
+    step: 0.05 # Distance between particles, directly affecting their quantity!
+    offset-x: 0.5 # Offset along the coordinates.
+    offset-y: 0.3
+    offset-z: 0.5
+    direction-x: 0 # Направление полёта частиц. Не работает с REDSTONE
+    direction-y: 0
+    direction-z: 0
+    speed: 0 #скорость полёта если есть направление полёта
+    number-of-steps: 6.5 # Influences the number of particles. 6.5 / 0.05 = 130 spawned particles (number-of-steps / step).
+    particle: REDSTONE
+    # To specify color and size for particles "REDSTONE", you need to include the color and size parameters.
+    size: 3
+    color-rgb-r: 0
+    color-rgb-g: 255
+    color-rgb-b: 255
+  ef=2:
+    type: CIRCLE
+    ticks: 36000
+    timeUpdate: 10
+    radius: 2
+    count: 0
+    step: 0.05
+    offset-x: 0.5
+    offset-y: 0.7
+    offset-z: 0.5
+    direction-x: 0
+    direction-y: 0
+    direction-z: 0
+    speed: 0
+    number-of-steps: 6.5
+    particle: REDSTONE
+    #only REDSTONE#
+    size: 3
+    color-rgb-r: 255
+    color-rgb-g: 0
+    color-rgb-b: 255
+
+  ef=3:
+    type: HELIX
+    ticks: 36000
+    timeUpdate: 15
+    radius: 1
+    count: 0
+    step: 0.05
+    height: 30
+    offset-x: 0.5
+    offset-y: 0.7
+    offset-z: 0.5
+    particle: REDSTONE
+    #To specify color and size for particles "REDSTONE", you need to include the color and size parameters.
+    size: 3
+    color-rgb-r: 255
+    color-rgb-g: 0
+    color-rgb-b: 255
+  ef=5:
+    type: EXPANDING-CIRCLE # Type of effect.
+    ticks: 36000
+    timeUpdate: 4
+    radius: 1.5 # Initial radius.
+    end-radius: 7 # End radius.
+    step-radius: 0.3 # Amount to increase intermediate radius by per timeUpdate.
+    count: 0
+    viewDistance: 30
+    step: 0.05
+    offset-x: 0.5
+    offset-y: 0.7
+    offset-z: 0.5
+    number-of-steps: 6.5
+    particle: FLAME
+    # To specify color and size for particles "REDSTONE", you need to include the color and size parameters.
+    size: 3
+    color-rgb-r: 0
+    color-rgb-g: 255
+    color-rgb-b: 255
+
+  ef=5=1:
+    type: EXPANDING_CIRCLE # Type of effect.
+    ticks: 36000
+    timeUpdate: 4
+    radius: 1.5 # Initial radius.
+    end-radius: 7 # End radius.
+    step-radius: 0.3 # Amount to increase intermediate radius by per timeUpdate.
+    count: 0
+    step: 0.05
+    offset-x: 0.5
+    offset-y: 0.7
+    offset-z: 0.5
+    number-of-steps: 6.5
+    particle: SOUL_FIRE_FLAME
+    #To specify color and size for particles "REDSTONE", you need to include the color and size parameters.
+    size: 3
+    color-rgb-r: 0
+    color-rgb-g: 255
+    color-rgb-b: 255
+
+  ef=6:
+    type: RANDOM_PARTICLE #The "REDSTONE" particle is not supported.
+    ticks: 36000
+    timeUpdate: 2 #The frequency of spawning new particles is measured in ticks.
+    radius: 7 #Spawn radius
+    count: 0
+    viewDistance: 30
+    particle: #You can add an unlimited number of particles. If you have a list of 10 particles, all 10 particles will be spawned during the "timeUpdate" event.
+      - FLAME
+      - PORTAL
+      - FALLING_OBSIDIAN_TEAR
+      - SOUL_FIRE_FLAME
+      - ENCHANTMENT_TABLE
+      - TOTEM
+  ef=7:
+    type: SPAWN_GUARD
+    ticks: 1
+    timeUpdate: 1
+    radius: 5
+    count: 5
+    name: '&cGuardian'
+    heal: 40
+
+  ef=8:
+    type: FIREWORK
+    ticks: 36000
+    timeUpdate: 2
+    start-height: 1
+    end-height: 10
+    step-height: 0.5
+    offset-x: 0.5
+    offset-y: 0.7
+    offset-z: 0.5
+    colors: #r:g:b
+      - 255:0:127
+      - 0:255:127
+      - 127:0:127
+      - 0:0:127
+      - 137:0:127
+      - 64:0:127
+
+  ef=9:
+    type: TORUS
+    ticks: 36000
+    timeUpdate: 15
+    inner-radius: 1
+    outer-radius: 3
+    count: 25
+    step: 2
+    offset-x: 0.5
+    offset-y: 0.7
+    offset-z: 0.5
+    particle: REDSTONE
+    #To specify color and size for particles "REDSTONE", you need to include the color and size parameters.
+    size: 3
+    color-rgb-r: 255
+    color-rgb-g: 0
+    color-rgb-b: 255
+  ef=10:
+    type: WRITHING_HELIX
+    ticks: 36000
+    timeUpdate: 1
+    radius: 1
+    count: 0
+    step: 0.05
+    height: 15
+    offset-x: 0.5
+    offset-y: 0.7
+    offset-z: 0.5
+    particle: REDSTONE
+    #To specify color and size for particles "REDSTONE", you need to include the color and size parameters.
+    size: 0.5
+    color-rgb-r: 255
+    color-rgb-g: 0
+    color-rgb-b: 255
+  ef=11:
+    type: HELIX
+    ticks: 36000
+    timeUpdate: 15
+    radius: 15
+    count: 0
+    step: 0.05
+    height: 30
+    offset-x: 0.5
+    offset-y: 0.7
+    offset-z: 0.5
+    particle: REDSTONE
+    #To specify color and size for particles "REDSTONE", you need to include the color and size parameters.
+    size: 3
+    color-rgb-r: 255
+    color-rgb-g: 0
+    color-rgb-b: 255
+
+  ef=12: #The "REDSTONE" particle is not supported.
+    type: PARTICLE_EXPLOSION
+    ticks: 1
+    timeUpdate: 1
+    radius: 0.1
+    count: 300
+    speed: 0.15
+    offset-x: 0.5
+    offset-y: 0.7
+    offset-z: 0.5
+    particle: SOUL
+

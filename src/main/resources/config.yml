@@ -1,4 +1,6 @@
-# Updated v1.1.0 by Storm (Discord: stormsms)
+# Updated v1.1.1 by Storm (Discord: stormsms)
+
+language: ru # en, ru
 
 geyser: false
 max-experience-pre-generated-location: 50
@@ -8,10 +10,25 @@ log-level: LOW
 state-serializable: true
 anti-steal:
   enable: true
+  show-message: true
+  show-cooldown-on-click: true # Отображать кулдаун при каждом нажатии на предмет
   max-interval: 5 #ms
   max-warnings: 5
   min-interval-to-ignore: 250 #ms
   сooldown: 200 #ms
+
+decoy-protection:
+  enable: false
+  fake-items:
+    - GUNPOWDER
+    - PHANTOM_MEMBRANE
+    - NAUTILUS_SHELL
+    - GRAY_DYE
+  fake-names:
+    - '&eКость пирата'
+    - '&6Рога мамонта'
+    - '&6Битая ваза'
+    - '&cБогатое сокровище'
 
 settings:
   world-guard-flags:

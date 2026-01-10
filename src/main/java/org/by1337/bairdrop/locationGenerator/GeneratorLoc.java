@@ -12,28 +12,34 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import org.bukkit.scheduler.BukkitTask;
 
 public class GeneratorLoc {
     public static HashMap<String, List<GenLoc>> locs = new HashMap<>();
-    private static boolean isStarted = false;
+    private static final AtomicBoolean isStarted = new AtomicBoolean(false);
+    private static BukkitTask currentTask = null;
 
-    public static void Stop(Player pl) {
-        if (!isStarted) {
+    public static synchronized void Stop(Player pl) {
+        if (!isStarted.get()) {
             Message.sendMsg(pl, BAirDrop.getConfigMessage().getMessage("generator-not-started"));
             return;
         }
         Message.sendMsg(pl, BAirDrop.getConfigMessage().getMessage("generator-stop"));
-        isStarted = false;
+        isStarted.set(false);
+        if (currentTask != null) {
+            currentTask.cancel();
+            currentTask = null;
+        }
     }
 
-    public static void Start(AirDrop airDrop, int timings, int count, Player pl) {
-        if (isStarted) {
+    public static synchronized void Start(AirDrop airDrop, int timings, int count, Player pl) {
+        if (!isStarted.compareAndSet(false, true)) {
             Message.sendMsg(pl, BAirDrop.getConfigMessage().getMessage("generator-already-launched"));
             return;
         }
-        isStarted = true;
         Message.sendMsg(pl, BAirDrop.getConfigMessage().getMessage("generator-start"));
-        new BukkitRunnable() {
+        currentTask = new BukkitRunnable() {
             int count1 = count;
             int fail = 0;
             AirDrop finalairDrop = airDrop;
@@ -66,14 +72,16 @@ public class GeneratorLoc {
                     Message.sendMsg(pl, String.format(BAirDrop.getConfigMessage().getMessage("generator-fail"), fail));
                 }
 
-                if (count1 == 0) {
-                    isStarted = false;
+                if (count1 <= 0) {
+                    isStarted.set(false);
+                    currentTask = null;
                     Message.sendMsg(pl, BAirDrop.getConfigMessage().getMessage("generator-good"));
                     GeneratorLoc.save();
                     cancel();
                     return;
                 }
-                if (!isStarted) {
+                if (!isStarted.get()) {
+                    currentTask = null;
                     Message.sendMsg(pl, BAirDrop.getConfigMessage().getMessage("generator-stop"));
                     GeneratorLoc.save();
                     cancel();

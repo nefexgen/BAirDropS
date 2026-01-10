@@ -48,18 +48,23 @@ public class CConfig implements Config, ConfigMessage {
     private File fileMessage;
     private boolean loaded;
     public HashMap<String, File> scripts = new HashMap<>();
+    private String language = "en";
 
     public void loadConfiguration() {
-        fileMenu = new File(getInstance().getDataFolder() + File.separator + "menu.yml");
+        language = getInstance().getConfig().getString("language", "en");
+        
+        initTranslations();
+        
+        fileMenu = new File(getInstance().getDataFolder() + File.separator + "translations" + File.separator + language + File.separator + "menu.yml");
         if (!fileMenu.exists()) {
-            getInstance().saveResource("menu.yml", true);
+            fileMenu = new File(getInstance().getDataFolder() + File.separator + "translations" + File.separator + "en" + File.separator + "menu.yml");
         }
         menu = YamlConfiguration.loadConfiguration(fileMenu);
 
 
-        fileGeneratorSettings = new File(getInstance().getDataFolder() + File.separator + "generatorSettings.yml");
+        fileGeneratorSettings = new File(getInstance().getDataFolder() + File.separator + "translations" + File.separator + language + File.separator + "generatorSettings.yml");
         if (!fileGeneratorSettings.exists()) {
-            getInstance().saveResource("generatorSettings.yml", true);
+            fileGeneratorSettings = new File(getInstance().getDataFolder() + File.separator + "translations" + File.separator + "en" + File.separator + "generatorSettings.yml");
         }
         generatorSettings = YamlConfiguration.loadConfiguration(fileGeneratorSettings);
 
@@ -83,9 +88,9 @@ public class CConfig implements Config, ConfigMessage {
         }
 
 
-        fileEffects = new File(getInstance().getDataFolder() + File.separator + "effects.yml");
+        fileEffects = new File(getInstance().getDataFolder() + File.separator + "translations" + File.separator + language + File.separator + "effects.yml");
         if (!fileEffects.exists()) {
-            getInstance().saveResource("effects.yml", true);
+            fileEffects = new File(getInstance().getDataFolder() + File.separator + "translations" + File.separator + "en" + File.separator + "effects.yml");
         }
         effects = YamlConfiguration.loadConfiguration(fileEffects);
 
@@ -95,16 +100,16 @@ public class CConfig implements Config, ConfigMessage {
         }
         locations = YamlConfiguration.loadConfiguration(fileLocations);
 
-        fileListeners = new File(getInstance().getDataFolder() + File.separator + "listeners.yml");
+        fileListeners = new File(getInstance().getDataFolder() + File.separator + "translations" + File.separator + language + File.separator + "listeners.yml");
         if (!fileListeners.exists()) {
-            getInstance().saveResource("listeners.yml", true);
+            fileListeners = new File(getInstance().getDataFolder() + File.separator + "translations" + File.separator + "en" + File.separator + "listeners.yml");
         }
         listeners = YamlConfiguration.loadConfiguration(fileListeners);
 
 
-        fileMessage = new File(getInstance().getDataFolder() + File.separator + "message.yml");
+        fileMessage = new File(getInstance().getDataFolder() + File.separator + "translations" + File.separator + language + File.separator + "message.yml");
         if (!fileMessage.exists()) {
-            getInstance().saveResource("message.yml", true);
+            fileMessage = new File(getInstance().getDataFolder() + File.separator + "translations" + File.separator + "en" + File.separator + "message.yml");
         }
         message = YamlConfiguration.loadConfiguration(fileMessage);
 
@@ -112,7 +117,13 @@ public class CConfig implements Config, ConfigMessage {
         File dir = new File(getInstance().getDataFolder() + File.separator + "airdrops");
         if (!dir.exists()) {
             dir.mkdir();
-            getInstance().saveResource("airdrops" + File.separator + "default.yml", true);
+            File defaultAirdrop = new File(dir, "default.yml");
+            File translatedDefault = new File(getInstance().getDataFolder() + File.separator + "translations" + File.separator + language + File.separator + "airdrops" + File.separator + "default.yml");
+            if (translatedDefault.exists()) {
+                copyFile(translatedDefault, defaultAirdrop);
+            } else {
+                getInstance().saveResource("airdrops" + File.separator + "default.yml", true);
+            }
         }
         File dir2 = new File(getInstance().getDataFolder() + File.separator + "scripts");//diamond.js
         if (!dir2.exists()) {
@@ -523,5 +534,78 @@ public class CConfig implements Config, ConfigMessage {
 
     public FileConfiguration getGeneratorSettings() {
         return generatorSettings;
+    }
+
+    private void initTranslations() {
+        File translationsDir = new File(getInstance().getDataFolder() + File.separator + "translations");
+        if (!translationsDir.exists()) {
+            translationsDir.mkdirs();
+        }
+        
+        String[] languages = {"en", "ru"};
+        String[] translationFiles = {"message.yml", "menu.yml", "listeners.yml", "effects.yml", "generatorSettings.yml"};
+        String[] translationDirs = {"airdrops"};
+        
+        for (String lang : languages) {
+            File langDir = new File(translationsDir, lang);
+            if (!langDir.exists()) {
+                langDir.mkdirs();
+            }
+            for (String fileName : translationFiles) {
+                File file = new File(langDir, fileName);
+                if (!file.exists()) {
+                    copyResource("translations/" + lang + "/" + fileName, file);
+                }
+            }
+            for (String dirName : translationDirs) {
+                File dir = new File(langDir, dirName);
+                if (!dir.exists()) {
+                    dir.mkdirs();
+                }
+                File defaultFile = new File(dir, "default.yml");
+                if (!defaultFile.exists()) {
+                    copyResource("translations/" + lang + "/" + dirName + "/default.yml", defaultFile);
+                }
+            }
+        }
+        Message.logger("[BAirDropS] Language: " + language);
+    }
+    
+    private void copyResource(String resourcePath, File outFile) {
+        InputStream in = getInstance().getResource(resourcePath);
+        if (in != null) {
+            try {
+                if (outFile.getParentFile() != null && !outFile.getParentFile().exists()) {
+                    outFile.getParentFile().mkdirs();
+                }
+                try (FileOutputStream out = new FileOutputStream(outFile)) {
+                    byte[] buffer = new byte[1024];
+                    int len;
+                    while ((len = in.read(buffer)) != -1) {
+                        out.write(buffer, 0, len);
+                    }
+                }
+                in.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    private void copyFile(File source, File dest) {
+        try (FileInputStream in = new FileInputStream(source);
+             FileOutputStream out = new FileOutputStream(dest)) {
+            byte[] buffer = new byte[1024];
+            int len;
+            while ((len = in.read(buffer)) != -1) {
+                out.write(buffer, 0, len);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public String getLanguage() {
+        return language;
     }
 }

@@ -1,0 +1,463 @@
+# Updated v1.1.1 by Storm (Discord: stormsms)
+
+air-name: '&6&l★ &e&lAirdrop &6&l★'
+inv-name: '&8» &6&lAirdrop Loot &8«'
+chest-inventory-size: 54
+air-id: 'default'
+air-spawn-world: world
+air-spawn-radius-min: -2000
+air-spawn-radius-max: 2000
+air-radius-protect: 15
+spawn-chance: 50
+timeToStart: 2
+use-pre-generated-locations: false
+search-before-start: 1
+stop-when-empty: false
+use-only-static-loc: false
+flatness-check: false
+use-static-loc: false
+static-location:
+  world: world
+  x: 0
+  y: 0
+  z: 0
+generator-settings: default
+air-holo-to-start:
+  - '{air-name}'
+  - '&aTime to start: &f{time-to-start} sec'
+air-holo:
+  - '{air-name}'
+  - '&cClosed!'
+  - '&aTime to open: &f{time-to-open} sec'
+air-holo-open:
+  - '{air-name}'
+  - '&aOpen'
+air-holo-click-wait:
+  - '{air-name}'
+  - '&7Click to activate'
+
+
+holo-offsets:
+  x: 0.5
+  y: 2.5
+  z: 0.5
+
+openingTime: 1
+start-countdown-after-click: false
+time-stop-event-must-go: false
+time-stop-event: 1
+chest-material-locked: RESPAWN_ANCHOR
+chest-material-unlocked: CHEST
+min-online-players: 1
+random-slot: true
+signed-events:
+  - chest-closed
+  - spawn-particle
+  - alert-start
+  - spawn-summoner-alert
+  - ACTIVATE
+  - alert-4
+  - alert
+  - alert-5
+  - alert-end
+  - end
+  - alert-open
+  - spawn-summoner
+inv:
+  '&8» &6&lAirdrop Loot &8«':
+    '0':
+      '70':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:diamond_helmet
+        count: 1
+        components:
+          minecraft:enchantments: '{"minecraft:protection":3,"minecraft:unbreaking":3}'
+        schema_version: 1
+    '1':
+      '70':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:diamond_chestplate
+        count: 1
+        components:
+          minecraft:enchantments: '{"minecraft:protection":3,"minecraft:unbreaking":3}'
+        schema_version: 1
+    '2':
+      '70':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:diamond_leggings
+        count: 1
+        components:
+          minecraft:enchantments: '{"minecraft:protection":3,"minecraft:unbreaking":3}'
+        schema_version: 1
+    '3':
+      '70':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:diamond_boots
+        count: 1
+        components:
+          minecraft:enchantments: '{"minecraft:protection":3,"minecraft:unbreaking":3}'
+        schema_version: 1
+    '4':
+      '70':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:diamond_sword
+        count: 1
+        components:
+          minecraft:enchantments: '{"minecraft:fire_aspect":1,"minecraft:sharpness":4,"minecraft:unbreaking":2}'
+        schema_version: 1
+    '5':
+      '70':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:diamond_axe
+        count: 1
+        components:
+          minecraft:enchantments: '{"minecraft:efficiency":3,"minecraft:unbreaking":2}'
+        schema_version: 1
+    '6':
+      '70':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:diamond_pickaxe
+        count: 1
+        components:
+          minecraft:enchantments: '{"minecraft:efficiency":3,"minecraft:unbreaking":2}'
+        schema_version: 1
+    '7':
+      '70':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:diamond_shovel
+        count: 1
+        components:
+          minecraft:enchantments: '{"minecraft:efficiency":3,"minecraft:unbreaking":2}'
+        schema_version: 1
+    '8':
+      '70':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:diamond_hoe
+        count: 1
+        components:
+          minecraft:enchantments: '{"minecraft:efficiency":3,"minecraft:unbreaking":2}'
+        schema_version: 1
+    '9':
+      '40':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:netherite_helmet
+        count: 1
+        components:
+          minecraft:enchantments: '{"minecraft:protection":4,"minecraft:unbreaking":3}'
+        schema_version: 1
+    '10':
+      '40':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:netherite_chestplate
+        count: 1
+        components:
+          minecraft:enchantments: '{"minecraft:protection":4,"minecraft:unbreaking":3}'
+        schema_version: 1
+    '11':
+      '40':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:netherite_leggings
+        count: 1
+        components:
+          minecraft:enchantments: '{"minecraft:protection":4,"minecraft:unbreaking":3}'
+        schema_version: 1
+    '12':
+      '40':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:netherite_boots
+        count: 1
+        components:
+          minecraft:enchantments: '{"minecraft:protection":4,"minecraft:unbreaking":3}'
+        schema_version: 1
+    '13':
+      '40':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:netherite_sword
+        count: 1
+        components:
+          minecraft:enchantments: '{"minecraft:fire_aspect":2,"minecraft:sharpness":5,"minecraft:unbreaking":3}'
+        schema_version: 1
+    '14':
+      '40':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:netherite_axe
+        count: 1
+        components:
+          minecraft:enchantments: '{"minecraft:efficiency":5,"minecraft:unbreaking":3}'
+        schema_version: 1
+    '15':
+      '40':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:netherite_pickaxe
+        count: 1
+        components:
+          minecraft:enchantments: '{"minecraft:efficiency":5,"minecraft:unbreaking":3}'
+        schema_version: 1
+    '16':
+      '40':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:netherite_shovel
+        count: 1
+        components:
+          minecraft:enchantments: '{"minecraft:efficiency":5,"minecraft:unbreaking":3}'
+        schema_version: 1
+    '17':
+      '40':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:netherite_hoe
+        count: 1
+        components:
+          minecraft:enchantments: '{"minecraft:efficiency":5,"minecraft:unbreaking":3}'
+        schema_version: 1
+    '18':
+      '75':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:emerald
+        count: 32
+        schema_version: 1
+    '19':
+      '55':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:enchanted_golden_apple
+        count: 2
+        schema_version: 1
+    '20':
+      '80':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:cooked_beef
+        count: 64
+        schema_version: 1
+    '21':
+      '45':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:totem_of_undying
+        count: 1
+        schema_version: 1
+    '22':
+      '80':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:experience_bottle
+        count: 16
+        schema_version: 1
+    '23':
+      '60':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:golden_apple
+        count: 8
+        schema_version: 1
+    '24':
+      '40':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:netherite_ingot
+        count: 2
+        schema_version: 1
+    '25':
+      '50':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:elytra
+        count: 1
+        schema_version: 1
+    '26':
+      '70':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:shield
+        count: 1
+        schema_version: 1
+    '27':
+      '50':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:netherite_scrap
+        count: 4
+        schema_version: 1
+    '28':
+      '65':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:diamond
+        count: 16
+        schema_version: 1
+    '29':
+      '65':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:obsidian
+        count: 32
+        schema_version: 1
+    '30':
+      '55':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:tnt
+        count: 16
+        schema_version: 1
+    '31':
+      '70':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:arrow
+        count: 64
+        schema_version: 1
+    '32':
+      '70':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:ender_pearl
+        count: 4
+        schema_version: 1
+    '33':
+      '70':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:firework_rocket
+        count: 64
+        schema_version: 1
+    '34':
+      '50':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:soul_lantern
+        count: 2
+        schema_version: 1
+    '35':
+      '70':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:soul_lantern
+        count: 1
+        schema_version: 1
+    '36':
+      '30':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:zombie_villager_spawn_egg
+        count: 1
+        schema_version: 1
+    '37':
+      '70':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:pig_spawn_egg
+        count: 1
+        schema_version: 1
+    '38':
+      '50':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:pig_spawn_egg
+        count: 2
+        schema_version: 1
+    '39':
+      '40':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:pig_spawn_egg
+        count: 3
+        schema_version: 1
+    '40':
+      '60':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:blaze_spawn_egg
+        count: 1
+        schema_version: 1
+    '41':
+      '50':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:blaze_spawn_egg
+        count: 2
+        schema_version: 1
+    '42':
+      '40':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:blaze_spawn_egg
+        count: 3
+        schema_version: 1
+    '43':
+      '100':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:dragon_head
+        count: 1
+        schema_version: 1
+    '44':
+      '100':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:wither_skeleton_skull
+        count: 1
+        schema_version: 1
+    '45':
+      '100':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:enchanted_book
+        count: 1
+        components:
+          minecraft:stored_enchantments: '{"minecraft:mending":1}'
+        schema_version: 1
+    '46':
+      '100':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:enchanted_book
+        count: 1
+        components:
+          minecraft:stored_enchantments: '{"minecraft:protection":1}'
+        schema_version: 1
+    '47':
+      '100':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:enchanted_book
+        count: 1
+        components:
+          minecraft:stored_enchantments: '{"minecraft:protection":2}'
+        schema_version: 1
+    '48':
+      '100':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:enchanted_book
+        count: 1
+        components:
+          minecraft:stored_enchantments: '{"minecraft:protection":3}'
+        schema_version: 1
+    '49':
+      '100':
+        ==: org.bukkit.inventory.ItemStack
+        DataVersion: 4440
+        id: minecraft:enchanted_book
+        count: 1
+        components:
+          minecraft:stored_enchantments: '{"minecraft:protection":4}'
+        schema_version: 1

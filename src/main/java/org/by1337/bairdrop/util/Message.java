@@ -220,6 +220,10 @@ public class Message {
      * @return The message with applied placeholders
      */
     public static String setPlaceholders(@Nullable Player player, String string) {
+        if (player != null) {
+            string = string.replace("%player_name%", player.getName());
+            string = string.replace("%player%", player.getName());
+        }
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             try {
                 return PlaceholderAPI.setPlaceholders(player, string.replace("&", "§")).replace("§", "&");

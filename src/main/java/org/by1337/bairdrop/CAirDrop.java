@@ -568,10 +568,8 @@ public class CAirDrop implements AirDrop, StateSerializable {
         }
         airDropStarted = true;
         updateEditAirMenu("stats");
-        if (BAirDrop.getInstance().getConfig().getBoolean("anti-steal.enable")) {
-            if (antiSteal != null) antiSteal.unregister();
-            antiSteal = new AntiSteal(this);
-        }
+        if (antiSteal != null) antiSteal.unregister();
+        antiSteal = new AntiSteal(this);
 
         notifyObservers(CustomEvent.START_EVENT, null);
     }
@@ -1439,10 +1437,8 @@ public class CAirDrop implements AirDrop, StateSerializable {
 
                     airDropStarted = true;
                     updateEditAirMenu("stats");
-                    if (BAirDrop.getInstance().getConfig().getBoolean("anti-steal.enable")) {
-                        if (antiSteal != null) antiSteal.unregister();
-                        antiSteal = new AntiSteal(this);
-                    }
+                    if (antiSteal != null) antiSteal.unregister();
+                    antiSteal = new AntiSteal(this);
 
                     if (!S_airDropLocked) {
                         airDropLocked = false;

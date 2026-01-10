@@ -76,7 +76,7 @@
 listeners:
   #TIMER#
   alert-5:
-    description: '&fMessage about opening in 5 seconds'
+    description: '&6Message about opening in 5 seconds'
     event: 'TIMER'
     requirement:
       check-1:
@@ -85,9 +85,8 @@ listeners:
     commands:
       - '[MESSAGE_ALL] {air-name}&7 will open in 5 seconds'
 
-
   alert-4:
-    description: '&fMessage about opening in 10 seconds'
+    description: '&6Message about opening in 10 seconds'
     event: 'TIMER'
     requirement:
       check-1:
@@ -97,25 +96,25 @@ listeners:
       - '[MESSAGE_ALL] {air-name}&7 will open in 10 seconds'
 
   anim:
-    description: '&fAnimation'  # Description
-    event: 'TIMER'  # Triggered every time the timer elapses
-    requirement: # Task execution conditions
+    description: '&6Animation'
+    event: 'TIMER'
+    requirement:
       check-1:
-        type: 'NUMERICAL_CHECK'  # Numerical check
-        input: '{time-to-open} % 2 == 0'  # Keep only even values
+        type: 'NUMERICAL_CHECK'
+        input: '{time-to-open} % 2 == 0'
       check-2:
-        type: 'LOGICAL_CHECK'  # Logical expression check
-        input: '{!airdrop-is-open}'  # Airdrop must not be open
+        type: 'LOGICAL_CHECK'
+        input: '{!airdrop-is-open}'
       check-3:
-        type: 'LOGICAL_CHECK'  # Logical expression check
-        input: '{airdrop-is-start}'  # Airdrop must be started
+        type: 'LOGICAL_CHECK'
+        input: '{airdrop-is-start}'
     commands:
-      - '[SET_MATERIAL_LIME_WOOL]'  # Set material to Lime Wool
-    deny-commands: # If any of the requirements fails
-      - '[CALL-anim-2]'  # Call listener anim-2
+      - '[SET_MATERIAL_LIME_WOOL]'
+    deny-commands:
+      - '[CALL-anim-2]'
 
   alert-start:
-    description: '&fMessage about starting in 30 seconds'
+    description: '&6Message about spawning in 30 seconds'
     event: 'TIMER'
     requirement:
       check-1:
@@ -126,7 +125,7 @@ listeners:
 
   #START_EVENT#
   spawn-particle:
-    description: '&fSpawns particles'
+    description: '&6Spawns particles'
     event: 'START_EVENT'
     requirement:
       check-1:
@@ -141,16 +140,16 @@ listeners:
 
 
   alert:
-    description: '&fSends a message to everyone about the start of the airdrop'
+    description: '&6Sends a message to everyone about   airdrop spawn'
     event: 'START_EVENT'
     commands:
-      - '[MESSAGE_ALL] {air-name}&7 has appeared! Coordinates: &6{x}&7,&6{y}&7,&6{z}'
+      - '[MESSAGE_ALL] {air-name}&7 has appeared! Coordinates: &6{x}&7, &6{y}&7, &6{z}'
       - '[TITLE_ALL] {air-name}&7 has appeared!'
       - '[SOUND_ALL] BLOCK_BEACON_POWER_SELECT'
 
   #END_EVENT#
   end:
-    description: '&fAirdrop completion'
+    description: '&6Airdrop completion'
     event: 'END_EVENT'
     requirement:
       check-1:
@@ -164,46 +163,52 @@ listeners:
       - '[EFFECT_STOP_ALL]'
       - '[MESSAGE_ALL] {air-name}&7 has ended!'
 
+  alert-end:
+    description: '&6Message about completion'
+    event: 'END_EVENT'
+    commands:
+      - '[MESSAGE_ALL] {air-name}&7 has disappeared!'
+
   #Others#
   alert-open:
-    description: '&fMessage about opening'
+    description: '&6Message about opening'
     event: 'UNLOCK_EVENT'
     commands:
       - '[MESSAGE_ALL] {air-name}&7 is open!'
 
   ACTIVATE:
-    description: '&fMessage about activating the airdrop%split%&fAlso triggers an effect'
+    description: '&6Message about airdrop activation.   Also triggers an effect'
     event: 'ACTIVATE'
     commands:
       - '[MESSAGE_ALL] &7Player &6%player_name% &7has activated {air-name}'
       - '[MESSAGE] {air-name} &aactivated!'
       - '[EFFECT_START-ef=5=1-ef_circle]'
-      - '[SOUND_ALL] UI_TOAST_CHALLENGE_COMPLETE' #BLOCK_BARREL_CLOSE
+      - '[SOUND_ALL] UI_TOAST_CHALLENGE_COMPLETE'
 
   spawn-summoner-alert:
-    description: '&aSends a message that a player has summoned the airdrop'
+    description: '&6Sends a message that a player   summoned the airdrop'
     event: 'SUMMONER'
     commands:
       - '[MESSAGE_ALL] &7Player &6%player_name% &7has summoned {air-name}&7!'
-      - '[SET_TIME_START-31]' # Set time to start to 31 seconds
+      - '[SET_TIME_START-31]'
 
 
   chest-closed:
-    description: '&fSends a message to the player that the airdrop is closed'
+    description: '&6Sends a message to the player that   airdrop is closed'
     event: 'CLICK_CLOSE'
     commands:
       - '[MESSAGE] {air-name} &cis closed!'
-      - '[SOUND] BLOCK_BARREL_CLOSE' #BLOCK_BARREL_CLOSE
+      - '[SOUND] BLOCK_BARREL_CLOSE'
 
   chest-open:
-    description: '&fPlays a sound to the player when clicking on the airdrop'
+    description: '&6Plays a sound to the player when   clicking on the airdrop'
     event: 'CLICK_OPEN'
     commands:
       - '[SOUND] BLOCK_BARREL_OPEN'
 
 
   spawn-summoner:
-    description: '&aSpawns particles if the airdrop is summoned by a player'
+    description: '&6Spawns particles if airdrop is summoned   by a player'
     event: 'SUMMONER'
     requirement:
       check-1:
@@ -218,26 +223,26 @@ listeners:
       - '[SOUND_ALL] UI_TOAST_CHALLENGE_COMPLETE'
 
   anim-2:
-    description: '&fAnimation'  # Description
-    event: 'NONE'  # Non-triggered event
-    requirement: # Task execution conditions
+    description: '&6Animation'
+    event: 'NONE'
+    requirement:
       check-1:
-        type: 'LOGICAL_CHECK'  # Logical expression check
-        input: '{!airdrop-is-open}'  # Airdrop must not be open
+        type: 'LOGICAL_CHECK'
+        input: '{!airdrop-is-open}'
       check-2:
-        type: 'LOGICAL_CHECK'  # Logical expression check
-        input: '{airdrop-is-start}'  # Airdrop must be started
+        type: 'LOGICAL_CHECK'
+        input: '{airdrop-is-start}'
     commands:
-      - '[SET_MATERIAL_RED_WOOL]'  # Set material to Red Wool
+      - '[SET_MATERIAL_RED_WOOL]'
 
   remove_summoner_block:
-    description: '&fRemoves summoner_block'
+    description: '&6Removes the summoner block'
     event: 'NONE'
     commands:
       - '[SET_MATERIAL_AIR]-offsets'
 
   steal:
-    description: '&fwhen the player use cheat steal chest'
+    description: '&6When a player uses a cheat to steal   from the chest'
     event: 'PLAYER_STEAL'
     commands:
       - '[CONSOLE] kick %player_name% cheat'

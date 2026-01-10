@@ -6,12 +6,14 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.Inventory;
 
 import org.by1337.bairdrop.AirDrop;
 import org.by1337.bairdrop.BAirDrop;
 import org.by1337.bairdrop.api.event.AirDropOpenEvent;
 import org.by1337.bairdrop.customListeners.CustomEvent;
 import org.by1337.bairdrop.util.AirManager;
+import org.by1337.bairdrop.util.DecoyManager;
 import org.by1337.bairdrop.util.Message;
 
 import java.util.HashMap;
@@ -50,7 +52,13 @@ public class InteractListener implements Listener {
                 Bukkit.getServer().getPluginManager().callEvent(airDropOpenEvent);
                 if(airDropOpenEvent.isCancelled())
                     return;
-                pl.openInventory(airDrop.getInventory());
+                if (DecoyManager.isEnabled()) {
+                    DecoyManager decoyManager = new DecoyManager(airDrop);
+                    Inventory decoyInventory = decoyManager.createDecoyInventory(pl);
+                    pl.openInventory(decoyInventory);
+                } else {
+                    pl.openInventory(airDrop.getInventory());
+                }
                 airDrop.notifyObservers(CustomEvent.CLICK_OPEN, pl);
                 if(!airDrop.isWasOpened()) {
                     airDrop.notifyObservers(CustomEvent.FIRST_OPEN, pl);
