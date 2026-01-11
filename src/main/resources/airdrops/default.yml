@@ -1,56 +1,71 @@
-# Updated v1.1.1 by Storm (Discord: stormsms)
+air-id: 'default' # ID аирдропа
+air-name: '<b><gradient:#FF2F2F:#E56EFF>Мистический сундук</gradient></b>' # Название аирдропа
+inv-name: '<b><gradient:#FF2F2F:#E56EFF>Мистический сундук</gradient></b>' # Название инвентаря
+chest-inventory-size: 54 # Размер инвентаря (9, 18, 27, 36, 45, 54)
 
-air-name: '&6&l★ &e&lAirdrop &6&l★'
-inv-name: '&8» &6&lAirdrop Loot &8«'
-chest-inventory-size: 54
-air-id: 'default'
-air-spawn-world: world
-air-spawn-radius-min: -2000
-air-spawn-radius-max: 2000
-air-radius-protect: 15
-spawn-chance: 50
-timeToStart: 2
-use-pre-generated-locations: false
-search-before-start: 1
-stop-when-empty: false
-use-only-static-loc: false
-flatness-check: false
-use-static-loc: false
+spawn-chance: 50 # Шанс спавна при случайном выборе
+air-spawn-world: world # Мир для спавна
+air-spawn-radius-min: -2000 # Минимальный радиус спавна от центра мира
+air-spawn-radius-max: 2000 # Максимальный радиус спавна от центра мира
+air-radius-protect: 15 # Радиус защитного региона (WorldGuard)
+generator-settings: default # Настройки генератора локаций (generator.yml)
+flatness-check: false # Проверять ровность поверхности
+
+use-static-loc: false # Использовать статическую локацию как альтернативу
+use-only-static-loc: false # Использовать ТОЛЬКО статическую локацию
 static-location:
   world: world
   x: 0
   y: 0
   z: 0
-generator-settings: default
-air-holo-to-start:
-  - '{air-name}'
-  - '&aTime to start: &f{time-to-start} sec'
-air-holo:
-  - '{air-name}'
-  - '&cClosed!'
-  - '&aTime to open: &f{time-to-open} sec'
-air-holo-open:
-  - '{air-name}'
-  - '&aOpen'
-air-holo-click-wait:
-  - '{air-name}'
-  - '&7Click to activate'
 
+timeToStart: 2.0 # Время до появления (в минутах, 0.5 для 30 сек)
+search-before-start: 1.0 # Время поиска локации перед стартом
+openingTime: 1.0 # Время до открытия аирдропа
+time-stop-event: 1.0 # Время до исчезновения после открытия
 
-holo-offsets:
+start-countdown-after-click: false # Начать отсчёт открытия после клика по сундуку
+time-stop-event-must-go: false # Таймер исчезновения идёт даже если сундук закрыт
+stop-when-empty: false # Исчезнуть когда инвентарь пуст
+min-online-players: 1 # Минимум игроков онлайн для спавна
+random-slot: true # Случайное расположение предметов в инвентаре
+
+chest-material-locked: RESPAWN_ANCHOR # Блок закрытого аирдропа
+chest-material-unlocked: CHEST # Блок открытого аирдропа
+
+holo-offsets: # Смещение голограммы относительно блока
   x: 0.5
   y: 2.5
   z: 0.5
 
-openingTime: 1
-start-countdown-after-click: false
-time-stop-event-must-go: false
-time-stop-event: 1
-chest-material-locked: RESPAWN_ANCHOR
-chest-material-unlocked: CHEST
-min-online-players: 1
-random-slot: true
-signed-events:
+air-holo-to-start: # Голограмма до появления
+  - '{air-name}'
+  - '&aДо появления: &f{time-to-start} сек'
+air-holo: # Голограмма когда аирдроп закрыт
+  - '{air-name}'
+  - '&cЗакрыт!'
+  - '&aДо открытия: &f{time-to-open} сек'
+air-holo-open: # Голограмма когда аирдроп открыт
+  - '{air-name}'
+  - '&aОткрыт'
+air-holo-click-wait: # Голограмма ожидания клика (start-countdown-after-click: true)
+  - '{air-name}'
+  - '&7Нажмите для активации'
+
+decoy-protection: # Фейковые предметы
+  enable: false
+  fake-items: # Материалы фейковых предметов
+    - GUNPOWDER
+    - PHANTOM_MEMBRANE
+    - NAUTILUS_SHELL
+    - GRAY_DYE
+  fake-names: # Названия фейковых предметов
+    - '&eКость пирата'
+    - '&6Рога мамонта'
+    - '&6Битая ваза'
+    - '&cБогатое сокровище'
+
+signed-events: # Подключённые слушатели (listeners.yml)
   - chest-closed
   - spawn-particle
   - alert-start
@@ -63,228 +78,409 @@ signed-events:
   - end
   - alert-open
   - spawn-summoner
-inv:
-  '&8» &6&lAirdrop Loot &8«':
+
+inv: # Предметы в инвентаре (слот -> шанс -> предмет)
+  'Редактирование наград &cаирдропа':
     '0':
-      '35':
+      '70':
         ==: org.bukkit.inventory.ItemStack
-        v: 3700
+        v: 4082
         type: DIAMOND_HELMET
         meta:
           ==: ItemMeta
           meta-type: ARMOR
-          display-name: '{"extra":[{"bold":true,"color":"aqua","text":"Diamond Helmet"}],"text":""}'
-          lore:
-            - '{"extra":[{"color":"gray","text":"Airdrop Loot"}],"text":""}'
           enchants:
-            PROTECTION: 4
+            PROTECTION: 3
             UNBREAKING: 3
     '1':
-      '35':
+      '70':
         ==: org.bukkit.inventory.ItemStack
-        v: 3700
+        v: 4082
         type: DIAMOND_CHESTPLATE
         meta:
           ==: ItemMeta
           meta-type: ARMOR
-          display-name: '{"extra":[{"bold":true,"color":"aqua","text":"Diamond Chestplate"}],"text":""}'
-          lore:
-            - '{"extra":[{"color":"gray","text":"Airdrop Loot"}],"text":""}'
           enchants:
-            PROTECTION: 4
+            PROTECTION: 3
             UNBREAKING: 3
     '2':
-      '35':
+      '70':
         ==: org.bukkit.inventory.ItemStack
-        v: 3700
+        v: 4082
         type: DIAMOND_LEGGINGS
         meta:
           ==: ItemMeta
           meta-type: ARMOR
-          display-name: '{"extra":[{"bold":true,"color":"aqua","text":"Diamond Leggings"}],"text":""}'
-          lore:
-            - '{"extra":[{"color":"gray","text":"Airdrop Loot"}],"text":""}'
           enchants:
-            PROTECTION: 4
+            PROTECTION: 3
             UNBREAKING: 3
     '3':
-      '35':
+      '70':
         ==: org.bukkit.inventory.ItemStack
-        v: 3700
+        v: 4082
         type: DIAMOND_BOOTS
         meta:
           ==: ItemMeta
           meta-type: ARMOR
-          display-name: '{"extra":[{"bold":true,"color":"aqua","text":"Diamond Boots"}],"text":""}'
-          lore:
-            - '{"extra":[{"color":"gray","text":"Airdrop Loot"}],"text":""}'
           enchants:
-            PROTECTION: 4
-            FEATHER_FALLING: 4
+            PROTECTION: 3
             UNBREAKING: 3
     '4':
-      '50':
+      '70':
         ==: org.bukkit.inventory.ItemStack
-        v: 3700
+        v: 4082
         type: DIAMOND_SWORD
         meta:
           ==: ItemMeta
           meta-type: UNSPECIFIC
-          display-name: '{"extra":[{"bold":true,"color":"aqua","text":"Diamond Sword"}],"text":""}'
-          lore:
-            - '{"extra":[{"color":"gray","text":"Airdrop Loot"}],"text":""}'
           enchants:
-            SHARPNESS: 5
-            UNBREAKING: 3
-            LOOTING: 3
+            FIRE_ASPECT: 1
+            SHARPNESS: 4
+            UNBREAKING: 2
     '5':
-      '40':
+      '70':
         ==: org.bukkit.inventory.ItemStack
-        v: 3700
-        type: NETHERITE_INGOT
-        amount: 2
+        v: 4082
+        type: DIAMOND_AXE
+        meta:
+          ==: ItemMeta
+          meta-type: UNSPECIFIC
+          enchants:
+            EFFICIENCY: 3
+            UNBREAKING: 2
     '6':
-      '60':
-        ==: org.bukkit.inventory.ItemStack
-        v: 3700
-        type: DIAMOND
-        amount: 8
-    '7':
       '70':
         ==: org.bukkit.inventory.ItemStack
-        v: 3700
-        type: EMERALD
-        amount: 16
-    '8':
-      '80':
-        ==: org.bukkit.inventory.ItemStack
-        v: 3700
-        type: GOLD_INGOT
-        amount: 32
-    '9':
-      '25':
-        ==: org.bukkit.inventory.ItemStack
-        v: 3700
-        type: ENCHANTED_GOLDEN_APPLE
-        amount: 2
-    '10':
-      '50':
-        ==: org.bukkit.inventory.ItemStack
-        v: 3700
-        type: GOLDEN_APPLE
-        amount: 8
-    '11':
-      '70':
-        ==: org.bukkit.inventory.ItemStack
-        v: 3700
-        type: COOKED_BEEF
-        amount: 64
-    '12':
-      '60':
-        ==: org.bukkit.inventory.ItemStack
-        v: 3700
-        type: GOLDEN_CARROT
-        amount: 32
-    '13':
-      '45':
-        ==: org.bukkit.inventory.ItemStack
-        v: 3700
-        type: BOW
-        meta:
-          ==: ItemMeta
-          meta-type: UNSPECIFIC
-          display-name: '{"extra":[{"bold":true,"color":"gold","text":"Power Bow"}],"text":""}'
-          enchants:
-            POWER: 5
-            INFINITY: 1
-            UNBREAKING: 3
-    '14':
-      '55':
-        ==: org.bukkit.inventory.ItemStack
-        v: 3700
-        type: ARROW
-        amount: 64
-    '15':
-      '40':
-        ==: org.bukkit.inventory.ItemStack
-        v: 3700
-        type: ENDER_PEARL
-        amount: 8
-    '16':
-      '30':
-        ==: org.bukkit.inventory.ItemStack
-        v: 3700
-        type: TOTEM_OF_UNDYING
-    '17':
-      '50':
-        ==: org.bukkit.inventory.ItemStack
-        v: 3700
-        type: EXPERIENCE_BOTTLE
-        amount: 32
-    '18':
-      '35':
-        ==: org.bukkit.inventory.ItemStack
-        v: 3700
-        type: TRIDENT
-        meta:
-          ==: ItemMeta
-          meta-type: UNSPECIFIC
-          display-name: '{"extra":[{"bold":true,"color":"dark_aqua","text":"Ocean Trident"}],"text":""}'
-          enchants:
-            LOYALTY: 3
-            RIPTIDE: 3
-            UNBREAKING: 3
-    '19':
-      '45':
-        ==: org.bukkit.inventory.ItemStack
-        v: 3700
+        v: 4082
         type: DIAMOND_PICKAXE
         meta:
           ==: ItemMeta
           meta-type: UNSPECIFIC
-          display-name: '{"extra":[{"bold":true,"color":"aqua","text":"Diamond Pickaxe"}],"text":""}'
           enchants:
-            EFFICIENCY: 5
-            FORTUNE: 3
-            UNBREAKING: 3
-    '20':
-      '55':
+            EFFICIENCY: 3
+            UNBREAKING: 2
+    '7':
+      '70':
         ==: org.bukkit.inventory.ItemStack
-        v: 3700
-        type: ELYTRA
+        v: 4082
+        type: DIAMOND_SHOVEL
         meta:
           ==: ItemMeta
           meta-type: UNSPECIFIC
-          display-name: '{"extra":[{"bold":true,"color":"light_purple","text":"Airdrop Wings"}],"text":""}'
           enchants:
-            UNBREAKING: 3
-            MENDING: 1
-    '21':
-      '65':
+            EFFICIENCY: 3
+            UNBREAKING: 2
+    '8':
+      '70':
         ==: org.bukkit.inventory.ItemStack
-        v: 3700
-        type: FIREWORK_ROCKET
-        amount: 64
-    '22':
+        v: 4082
+        type: DIAMOND_HOE
+        meta:
+          ==: ItemMeta
+          meta-type: UNSPECIFIC
+          enchants:
+            EFFICIENCY: 3
+            UNBREAKING: 2
+    '9':
       '40':
         ==: org.bukkit.inventory.ItemStack
-        v: 3700
-        type: SHIELD
+        v: 4082
+        type: NETHERITE_HELMET
+        meta:
+          ==: ItemMeta
+          meta-type: ARMOR
+          enchants:
+            PROTECTION: 4
+            UNBREAKING: 3
+    '10':
+      '40':
+        ==: org.bukkit.inventory.ItemStack
+        v: 4082
+        type: NETHERITE_CHESTPLATE
+        meta:
+          ==: ItemMeta
+          meta-type: ARMOR
+          enchants:
+            PROTECTION: 4
+            UNBREAKING: 3
+    '11':
+      '40':
+        ==: org.bukkit.inventory.ItemStack
+        v: 4082
+        type: NETHERITE_LEGGINGS
+        meta:
+          ==: ItemMeta
+          meta-type: ARMOR
+          enchants:
+            PROTECTION: 4
+            UNBREAKING: 3
+    '12':
+      '40':
+        ==: org.bukkit.inventory.ItemStack
+        v: 4082
+        type: NETHERITE_BOOTS
+        meta:
+          ==: ItemMeta
+          meta-type: ARMOR
+          enchants:
+            PROTECTION: 4
+            UNBREAKING: 3
+    '13':
+      '40':
+        ==: org.bukkit.inventory.ItemStack
+        v: 4082
+        type: NETHERITE_SWORD
         meta:
           ==: ItemMeta
           meta-type: UNSPECIFIC
           enchants:
+            FIRE_ASPECT: 2
+            SHARPNESS: 5
             UNBREAKING: 3
-    '23':
-      '50':
+    '14':
+      '40':
         ==: org.bukkit.inventory.ItemStack
-        v: 3700
-        type: CROSSBOW
+        v: 4082
+        type: NETHERITE_AXE
         meta:
           ==: ItemMeta
-          meta-type: CROSSBOW
-          display-name: '{"extra":[{"bold":true,"color":"red","text":"Battle Crossbow"}],"text":""}'
+          meta-type: UNSPECIFIC
           enchants:
-            QUICK_CHARGE: 3
-            MULTISHOT: 1
+            EFFICIENCY: 5
             UNBREAKING: 3
+    '15':
+      '40':
+        ==: org.bukkit.inventory.ItemStack
+        v: 4082
+        type: NETHERITE_PICKAXE
+        meta:
+          ==: ItemMeta
+          meta-type: UNSPECIFIC
+          enchants:
+            EFFICIENCY: 5
+            UNBREAKING: 3
+    '16':
+      '40':
+        ==: org.bukkit.inventory.ItemStack
+        v: 4082
+        type: NETHERITE_SHOVEL
+        meta:
+          ==: ItemMeta
+          meta-type: UNSPECIFIC
+          enchants:
+            EFFICIENCY: 5
+            UNBREAKING: 3
+    '17':
+      '40':
+        ==: org.bukkit.inventory.ItemStack
+        v: 4082
+        type: NETHERITE_HOE
+        meta:
+          ==: ItemMeta
+          meta-type: UNSPECIFIC
+          enchants:
+            EFFICIENCY: 5
+            UNBREAKING: 3
+    '18':
+      '75':
+        ==: org.bukkit.inventory.ItemStack
+        v: 4082
+        type: EMERALD
+        amount: 32
+    '19':
+      '55':
+        ==: org.bukkit.inventory.ItemStack
+        v: 4082
+        type: ENCHANTED_GOLDEN_APPLE
+        amount: 2
+    '20':
+      '80':
+        ==: org.bukkit.inventory.ItemStack
+        v: 4082
+        type: COOKED_BEEF
+        amount: 64
+    '21':
+      '45':
+        ==: org.bukkit.inventory.ItemStack
+        v: 4082
+        type: TOTEM_OF_UNDYING
+    '22':
+      '80':
+        ==: org.bukkit.inventory.ItemStack
+        v: 4082
+        type: EXPERIENCE_BOTTLE
+        amount: 16
+    '23':
+      '60':
+        ==: org.bukkit.inventory.ItemStack
+        v: 4082
+        type: GOLDEN_APPLE
+        amount: 8
+    '24':
+      '40':
+        ==: org.bukkit.inventory.ItemStack
+        v: 4082
+        type: NETHERITE_INGOT
+        amount: 2
+    '25':
+      '50':
+        ==: org.bukkit.inventory.ItemStack
+        v: 4082
+        type: ELYTRA
+    '26':
+      '70':
+        ==: org.bukkit.inventory.ItemStack
+        v: 4082
+        type: SHIELD
+    '27':
+      '50':
+        ==: org.bukkit.inventory.ItemStack
+        v: 4082
+        type: NETHERITE_SCRAP
+        amount: 4
+    '28':
+      '65':
+        ==: org.bukkit.inventory.ItemStack
+        v: 4082
+        type: DIAMOND
+        amount: 16
+    '29':
+      '65':
+        ==: org.bukkit.inventory.ItemStack
+        v: 4082
+        type: OBSIDIAN
+        amount: 32
+    '30':
+      '55':
+        ==: org.bukkit.inventory.ItemStack
+        v: 4082
+        type: TNT
+        amount: 16
+    '31':
+      '70':
+        ==: org.bukkit.inventory.ItemStack
+        v: 4082
+        type: ARROW
+        amount: 64
+    '32':
+      '70':
+        ==: org.bukkit.inventory.ItemStack
+        v: 4082
+        type: ENDER_PEARL
+        amount: 4
+    '33':
+      '70':
+        ==: org.bukkit.inventory.ItemStack
+        v: 4082
+        type: FIREWORK_ROCKET
+        amount: 64
+    '34':
+      '50':
+        ==: org.bukkit.inventory.ItemStack
+        v: 4082
+        type: SOUL_LANTERN
+        amount: 2
+    '35':
+      '70':
+        ==: org.bukkit.inventory.ItemStack
+        v: 4082
+        type: SOUL_LANTERN
+    '36':
+      '30':
+        ==: org.bukkit.inventory.ItemStack
+        v: 4082
+        type: ZOMBIE_VILLAGER_SPAWN_EGG
+    '37':
+      '70':
+        ==: org.bukkit.inventory.ItemStack
+        v: 4082
+        type: PIG_SPAWN_EGG
+    '38':
+      '50':
+        ==: org.bukkit.inventory.ItemStack
+        v: 4082
+        type: PIG_SPAWN_EGG
+        amount: 2
+    '39':
+      '40':
+        ==: org.bukkit.inventory.ItemStack
+        v: 4082
+        type: PIG_SPAWN_EGG
+        amount: 3
+    '40':
+      '60':
+        ==: org.bukkit.inventory.ItemStack
+        v: 4082
+        type: BLAZE_SPAWN_EGG
+    '41':
+      '50':
+        ==: org.bukkit.inventory.ItemStack
+        v: 4082
+        type: BLAZE_SPAWN_EGG
+        amount: 2
+    '42':
+      '40':
+        ==: org.bukkit.inventory.ItemStack
+        v: 4082
+        type: BLAZE_SPAWN_EGG
+        amount: 3
+    '43':
+      '100':
+        ==: org.bukkit.inventory.ItemStack
+        v: 4082
+        type: DRAGON_HEAD
+    '44':
+      '100':
+        ==: org.bukkit.inventory.ItemStack
+        v: 4082
+        type: WITHER_SKELETON_SKULL
+    '45':
+      '100':
+        ==: org.bukkit.inventory.ItemStack
+        v: 4082
+        type: ENCHANTED_BOOK
+        meta:
+          ==: ItemMeta
+          meta-type: ENCHANTED
+          stored-enchants:
+            MENDING: 1
+    '46':
+      '100':
+        ==: org.bukkit.inventory.ItemStack
+        v: 4082
+        type: ENCHANTED_BOOK
+        meta:
+          ==: ItemMeta
+          meta-type: ENCHANTED
+          stored-enchants:
+            PROTECTION: 1
+    '47':
+      '100':
+        ==: org.bukkit.inventory.ItemStack
+        v: 4082
+        type: ENCHANTED_BOOK
+        meta:
+          ==: ItemMeta
+          meta-type: ENCHANTED
+          stored-enchants:
+            PROTECTION: 2
+    '48':
+      '100':
+        ==: org.bukkit.inventory.ItemStack
+        v: 4082
+        type: ENCHANTED_BOOK
+        meta:
+          ==: ItemMeta
+          meta-type: ENCHANTED
+          stored-enchants:
+            PROTECTION: 3
+    '49':
+      '100':
+        ==: org.bukkit.inventory.ItemStack
+        v: 4082
+        type: ENCHANTED_BOOK
+        meta:
+          ==: ItemMeta
+          meta-type: ENCHANTED
+          stored-enchants:
+            PROTECTION: 4

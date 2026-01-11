@@ -7,7 +7,6 @@ import org.by1337.bairdrop.util.Message;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
@@ -15,46 +14,12 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.by1337.bairdrop.BAirDrop;
 
 public class CGenerator implements Generator{
-    /**
-     * Delay for debug messages
-     */
-
     private static final HashMap<String, Long> cd = new HashMap<>();
     private World world;
 
-    /**
-     * Returns a pre-generated location
-     * @param airDrop The AirDrop for which to obtain the location
-     * @return Pre-generated location
-     * @see GeneratorLoc
-     * @see CGenLoc
-     */
     @Override
     @Nullable
-    public Location getPreLocation(@NotNull AirDrop airDrop) {
-        world = airDrop.getWorld();
-        if (GeneratorLoc.locs.getOrDefault(airDrop.getSuperName(), new ArrayList<>()).isEmpty()) {
-            if (cd.getOrDefault(airDrop.getSuperName() + "001", 0L) < System.currentTimeMillis()) {
-                Message.warning(String.format(BAirDrop.getConfigMessage().getMessage("locations-are-absent"), world.getName()));
-                Message.warning(BAirDrop.getConfigMessage().getMessage("attempt-use-static-loc"));
-                cd.put(airDrop.getSuperName() + "001", System.currentTimeMillis() + 150000L);//скажем что это error 001
-            }
-            if (airDrop.isUseStaticLoc())
-                return airDrop.getStaticLocation();
-            return null;
-        }
-        return PreGeneratedLocations(airDrop);
-    }
-
-    /**
-     * Main method for generating locations
-     * @param airDrop The AirDrop for which to generate the location
-     * @param isGenerator If this is a generator generating locations, there will be no logging
-     * @return Generated location
-     */
-    @Override
-    @Nullable
-    public Location getLocation(@NotNull AirDrop airDrop, boolean isGenerator) {
+    public Location getLocation(@NotNull AirDrop airDrop) {
         world = airDrop.getWorld();
 
         double x = ThreadLocalRandom.current().nextInt(airDrop.getSpawnRadiusMin(), airDrop.getSpawnRadiusMax());
@@ -69,9 +34,9 @@ public class CGenerator implements Generator{
         if (worldType.equals("THE_END"))
             return getLocation_THE_END(loc1, airDrop);
         if (worldType.equals("NETHER")) {
-            if (!isGenerator && cd.getOrDefault(airDrop.getSuperName() + "002", 0L) < System.currentTimeMillis()) {
+            if (cd.getOrDefault(airDrop.getSuperName() + "002", 0L) < System.currentTimeMillis()) {
                 Message.warning(String.format(BAirDrop.getConfigMessage().getMessage("generation-nether"), airDrop.getSuperName()));
-                cd.put(airDrop.getSuperName() + "002", System.currentTimeMillis() + 150000L);//а это 002
+                cd.put(airDrop.getSuperName() + "002", System.currentTimeMillis() + 150000L);
             }
             return getLocation_NETHER(loc1, airDrop);
         }
@@ -222,50 +187,6 @@ public class CGenerator implements Generator{
         }
         return true;
     }
-
-    @Nullable
-    private Location PreGeneratedLocations(AirDrop airDrop) {
-        if (airDrop.getPickPreGenLocs() >= BAirDrop.getInstance().getConfig().getInt("max-experience-pre-generated-location")) {
-            if (cd.getOrDefault(airDrop.getSuperName() + "004", 0L) < System.currentTimeMillis()) {
-                Message.error(BAirDrop.getConfigMessage().getMessage("search-location-limit"));
-                Message.error(String.format(BAirDrop.getConfigMessage().getMessage("search-location-limit-2"), airDrop.getSuperName()));
-                cd.put(airDrop.getSuperName() + "004", System.currentTimeMillis() + 75000L);//004
-            }
-            if (airDrop.isUseStaticLoc())
-                return airDrop.getStaticLocation();
-            return null;
-        }
-        airDrop.setPickPreGenLocs(airDrop.getPickPreGenLocs() + 1);
-
-        Location loc = GeneratorLoc.getLocationForAirDrop(airDrop);
-        if (loc == null) {
-            Message.error(String.format(BAirDrop.getConfigMessage().getMessage("gen-loc-is-null"), airDrop.getSuperName()));
-            return null;
-        }
-        if (loc.clone().add(-GeneratorUtils.getOffsets(airDrop).getX(), -GeneratorUtils.getOffsets(airDrop).getY(), -GeneratorUtils.getOffsets(airDrop).getZ()).getBlock().isEmpty()) {
-            GeneratorLoc.removeLoc(loc, airDrop);
-            Message.logger(String.format(BAirDrop.getConfigMessage().getMessage("location-isn-t-relevant"), loc.getWorld(), loc.getX(), loc.getY(), loc.getZ()));
-            if (airDrop.getEditAirMenu() != null)
-                airDrop.getEditAirMenu().menuGenerate("usePreGeneratedLocations");
-            return null;
-        }
-        if (isBiomeInBlackList(loc)) {
-            GeneratorLoc.removeLoc(loc, airDrop);
-            Message.logger(String.format(BAirDrop.getConfigMessage().getMessage("location-isn-t-relevant"), loc.getWorld(), loc.getX(), loc.getY(), loc.getZ()));
-            if (airDrop.getEditAirMenu() != null)
-                airDrop.getEditAirMenu().menuGenerate("usePreGeneratedLocations");
-            return null;
-        }
-        if (!GeneratorUtils.isRegionEmpty(airDrop, loc)) {
-            GeneratorLoc.removeLoc(loc, airDrop);
-            Message.logger(String.format(BAirDrop.getConfigMessage().getMessage("location-isn-t-relevant"), loc.getWorld(), loc.getX(), loc.getY(), loc.getZ()));
-            if (airDrop.getEditAirMenu() != null)
-                airDrop.getEditAirMenu().menuGenerate("usePreGeneratedLocations");
-            return null;
-        }
-        return loc;
-    }
-
 
     private boolean isBiomeInBlackList(@NotNull Location location) {
         Biome bom = location.getWorld().getBiome((int) location.getX(), (int) location.getY(), (int) location.getZ());

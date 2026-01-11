@@ -914,16 +914,16 @@ public class ExecuteCommands {
                 getServer().getPluginManager().registerEvents(cw, BAirDrop.getInstance());
                 pl.openInventory(cw.getInventory());
             }
-            if (str.equalsIgnoreCase("[!usePreGeneratedLocations]")) {
-                airDrop.setUsePreGeneratedLocations(!airDrop.isUsePreGeneratedLocations());
-                airDrop.save();
-            }
             if (str.equalsIgnoreCase("[!use-static-loc]")) {
                 airDrop.setUseStaticLoc(!airDrop.isUseStaticLoc());
                 airDrop.save();
             }
             if (str.equalsIgnoreCase("[!flatnessCheck]")) {
                 airDrop.setFlatnessCheck(!airDrop.isFlatnessCheck());
+                airDrop.save();
+            }
+            if (str.equalsIgnoreCase("[!decoyProtection]")) {
+                airDrop.setDecoyProtectionEnabled(!airDrop.isDecoyProtectionEnabled());
                 airDrop.save();
             }
             if (str.equalsIgnoreCase("[!time-stop-event-must-go]")) {

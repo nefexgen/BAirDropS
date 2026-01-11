@@ -19,7 +19,6 @@ import org.bukkit.util.Vector;
 import org.by1337.bairdrop.ItemUtil.EnchantMaterial;
 import org.by1337.bairdrop.ItemUtil.Items;
 import org.by1337.bairdrop.locationGenerator.Generator;
-import org.by1337.bairdrop.locationGenerator.GeneratorLoc;
 import org.by1337.bairdrop.locationGenerator.CGenerator;
 import org.by1337.bairdrop.locationGenerator.GeneratorUtils;
 import org.by1337.bairdrop.worldGuardHook.RegionManager;
@@ -80,16 +79,14 @@ public class CAirDrop implements AirDrop, StateSerializable {
     private List<String> signedListener;
     private EditAirMenu EditAirMenu;
     private boolean activated;
-    private boolean usePreGeneratedLocations;
-    private int timeToStartCons;
-    private int timeToStopCons;
-    private int timeToUnlockCons;
-    private int searchBeforeStartCons;
+    private double timeToStartCons;
+    private double timeToStopCons;
+    private double timeToUnlockCons;
+    private double searchBeforeStartCons;
     private boolean flatnessCheck;
     private Location staticLocation;
     private boolean useStaticLoc;
     private HashMap<String, IEffect> loadedEffect = new HashMap<>();
-    private int pickPreGenLocs;
     private int spawnChance;
     private boolean timeCountingEnabled;
     private EditSession editSession = null;
@@ -114,9 +111,13 @@ public class CAirDrop implements AirDrop, StateSerializable {
     private boolean useOnlyStaticLoc;
     private final List<Observer> observers = new ArrayList<>();
     private AntiSteal antiSteal = null;
+    private DecoyManager decoyManager = null;
     private Generator generator;
     private String superName;
     private List<String> dec = new ArrayList<>();
+    private boolean decoyProtectionEnabled = false;
+    private List<String> decoyFakeItems = new ArrayList<>();
+    private List<String> decoyFakeNames = new ArrayList<>();
 
     CAirDrop(FileConfiguration fileConfiguration, File airDropFile) {
         CAirDropInstance = this;
@@ -154,7 +155,6 @@ public class CAirDrop implements AirDrop, StateSerializable {
 
             spawnChance = fileConfiguration.getInt("spawn-chance");
             flatnessCheck = fileConfiguration.getBoolean("flatness-check");
-            usePreGeneratedLocations = fileConfiguration.getBoolean("use-pre-generated-locations");
             minPlayersToStart = fileConfiguration.getInt("min-online-players");
             inventoryTitle = fileConfiguration.getString("inv-name");
 
@@ -172,17 +172,17 @@ public class CAirDrop implements AirDrop, StateSerializable {
             generatorSettings = fileConfiguration.getString("generator-settings");
 
 
-            timeToStartCons = fileConfiguration.getInt("timeToStart");
-            timeToStart = timeToStartCons * 60;
+            timeToStartCons = fileConfiguration.getDouble("timeToStart");
+            timeToStart = (int) (timeToStartCons * 60);
 
-            searchBeforeStartCons = fileConfiguration.getInt("search-before-start");
-            searchBeforeStart = searchBeforeStartCons * 60;
+            searchBeforeStartCons = fileConfiguration.getDouble("search-before-start");
+            searchBeforeStart = (int) (searchBeforeStartCons * 60);
 
-            timeToUnlockCons = fileConfiguration.getInt("openingTime");
-            timeToOpen = timeToUnlockCons * 60;
+            timeToUnlockCons = fileConfiguration.getDouble("openingTime");
+            timeToOpen = (int) (timeToUnlockCons * 60);
 
-            timeToStopCons = fileConfiguration.getInt("time-stop-event");
-            timeStop = timeToStopCons * 60;
+            timeToStopCons = fileConfiguration.getDouble("time-stop-event");
+            timeStop = (int) (timeToStopCons * 60);
 
             startCountdownAfterClick = fileConfiguration.getBoolean("start-countdown-after-click");
             timeStopEventMustGo = fileConfiguration.getBoolean("time-stop-event-must-go");
@@ -193,13 +193,16 @@ public class CAirDrop implements AirDrop, StateSerializable {
 
             signedListener = signedListener.stream().map(String::toLowerCase).collect(Collectors.toList());
 
-            inventory = Bukkit.createInventory(null, inventorySize, Message.messageBuilder(inventoryTitle));
+            inventory = Bukkit.createInventory(null, inventorySize, Message.messageBuilderComponent(inventoryTitle));
 
             airHolo = fileConfiguration.getStringList("air-holo");
             airHoloOpen = fileConfiguration.getStringList("air-holo-open");
             airHoloClickWait = fileConfiguration.getStringList("air-holo-click-wait");
             airHoloToStart = fileConfiguration.getStringList("air-holo-to-start");
             useOnlyStaticLoc = fileConfiguration.getBoolean("use-only-static-loc");
+            decoyProtectionEnabled = fileConfiguration.getBoolean("decoy-protection.enable", false);
+            decoyFakeItems = fileConfiguration.getStringList("decoy-protection.fake-items");
+            decoyFakeNames = fileConfiguration.getStringList("decoy-protection.fake-names");
             holoOffsets = new Vector(
                     fileConfiguration.getDouble("holo-offsets.x"),
                     fileConfiguration.getDouble("holo-offsets.y"),
@@ -249,7 +252,6 @@ public class CAirDrop implements AirDrop, StateSerializable {
             this.id = id;
             superName = id;
             createFile();
-            usePreGeneratedLocations = false;
             minPlayersToStart = 0;
             inventoryTitle = "new air";
             displayName = "new air name";
@@ -285,7 +287,7 @@ public class CAirDrop implements AirDrop, StateSerializable {
             airHoloToStart = BAirDrop.getConfigMessage().getList("air-holo-to-start");
             holoOffsets = new Vector(0.5, 2.5, 0.5);
             generator = new CGenerator();
-            inventory = Bukkit.createInventory(null, inventorySize, Message.messageBuilder(inventoryTitle));
+            inventory = Bukkit.createInventory(null, inventorySize, Message.messageBuilderComponent(inventoryTitle));
             Message.logger(BAirDrop.getConfigMessage().getMessage("air-loaded").replace("{id}", this.id));
         } catch (Exception var3) {
             var3.printStackTrace();
@@ -419,51 +421,62 @@ public class CAirDrop implements AirDrop, StateSerializable {
     @Override
     public void save() {
         if (clone) return;
-        fileConfiguration.set("random-slot", randomizeSlot);
-        fileConfiguration.set("generator-settings", generatorSettings);
-        fileConfiguration.set("spawn-chance", spawnChance);
-        fileConfiguration.set("flatness-check", flatnessCheck);
-        fileConfiguration.set("min-online-players", minPlayersToStart);
-        fileConfiguration.set("inv-name", inventoryTitle);
+        
         fileConfiguration.set("air-id", id);
         fileConfiguration.set("air-name", displayName);
+        fileConfiguration.set("inv-name", inventoryTitle);
         fileConfiguration.set("chest-inventory-size", inventorySize);
+        
+        fileConfiguration.set("spawn-chance", spawnChance);
         fileConfiguration.set("air-spawn-world", world.getName());
         fileConfiguration.set("air-spawn-radius-min", spawnRadiusMin);
         fileConfiguration.set("air-spawn-radius-max", spawnRadiusMax);
         fileConfiguration.set("air-radius-protect", regionRadius);
-        fileConfiguration.set("timeToStart", timeToStartCons);
-        fileConfiguration.set("search-before-start", searchBeforeStartCons);
-        fileConfiguration.set("openingTime", timeToUnlockCons);
-        fileConfiguration.set("start-countdown-after-click", startCountdownAfterClick);
-        fileConfiguration.set("time-stop-event-must-go", timeStopEventMustGo);
-        fileConfiguration.set("time-stop-event", timeToStopCons);
-        fileConfiguration.set("chest-material-locked", materialLocked.toString());
-        fileConfiguration.set("chest-material-unlocked", materialUnlocked.toString());
-        fileConfiguration.set("signed-events", signedListener);
-        fileConfiguration.set("use-pre-generated-locations", usePreGeneratedLocations);
+        fileConfiguration.set("generator-settings", generatorSettings);
+        fileConfiguration.set("flatness-check", flatnessCheck);
+        
         fileConfiguration.set("use-static-loc", useStaticLoc);
         fileConfiguration.set("use-only-static-loc", useOnlyStaticLoc);
         if (staticLocation != null) {
+            fileConfiguration.set("static-location.world", staticLocation.getWorld().getName());
             fileConfiguration.set("static-location.x", staticLocation.getX());
             fileConfiguration.set("static-location.y", staticLocation.getY());
             fileConfiguration.set("static-location.z", staticLocation.getZ());
-            fileConfiguration.set("static-location.world", staticLocation.getWorld().getName());
         }
-        fileConfiguration.set("air-holo", airHolo);
-        fileConfiguration.set("air-holo-open", airHoloOpen);
-        fileConfiguration.set("air-holo-click-wait", airHoloClickWait);
-        fileConfiguration.set("air-holo-to-start", airHoloToStart);
+        
+        fileConfiguration.set("timeToStart", timeToStartCons);
+        fileConfiguration.set("search-before-start", searchBeforeStartCons);
+        fileConfiguration.set("openingTime", timeToUnlockCons);
+        fileConfiguration.set("time-stop-event", timeToStopCons);
+        
+        fileConfiguration.set("start-countdown-after-click", startCountdownAfterClick);
+        fileConfiguration.set("time-stop-event-must-go", timeStopEventMustGo);
+        fileConfiguration.set("stop-when-empty", stopWhenEmpty);
+        fileConfiguration.set("min-online-players", minPlayersToStart);
+        fileConfiguration.set("random-slot", randomizeSlot);
+        
+        fileConfiguration.set("chest-material-locked", materialLocked.toString());
+        fileConfiguration.set("chest-material-unlocked", materialUnlocked.toString());
+        
         fileConfiguration.set("holo-offsets.x", holoOffsets.getX());
         fileConfiguration.set("holo-offsets.y", holoOffsets.getY());
         fileConfiguration.set("holo-offsets.z", holoOffsets.getZ());
+        
+        fileConfiguration.set("air-holo-to-start", airHoloToStart);
+        fileConfiguration.set("air-holo", airHolo);
+        fileConfiguration.set("air-holo-open", airHoloOpen);
+        fileConfiguration.set("air-holo-click-wait", airHoloClickWait);
+        
+        fileConfiguration.set("decoy-protection.enable", decoyProtectionEnabled);
+        fileConfiguration.set("decoy-protection.fake-items", decoyFakeItems);
+        fileConfiguration.set("decoy-protection.fake-names", decoyFakeNames);
+        
+        fileConfiguration.set("signed-events", signedListener);
 
         if (!getListItems().isEmpty()) {
             fileConfiguration.set("inv", null);
             for (String invName : getListItems().keySet()) {
-                //    Message.debug(invName);
                 for (Items item : getListItems().get(invName)) {
-                    //    Message.debug("inv." + invName + "." + item.getSlot() + "." + item.getChance());
                     fileConfiguration.set("inv." + invName + "." + item.getSlot() + "." + item.getChance(), item.getItem());
                 }
             }
@@ -635,30 +648,33 @@ public class CAirDrop implements AirDrop, StateSerializable {
             airDropLocation.getBlock().setType(Material.AIR);
         RegionManager.RemoveRegion(this);
         airDropLocation = null;
-        inventory.clear();
         List<HumanEntity> list = new ArrayList<>(inventory.getViewers());
         for (HumanEntity he : list) {
             if (he instanceof Player pl) {
                 pl.closeInventory();
             }
         }
+        inventory.clear();
         wasOpened = false;
         airDropStarted = false;
         activated = false;
-        timeToStart = timeToStartCons * 60;
-        searchBeforeStart = searchBeforeStartCons * 60;
-        timeToOpen = timeToUnlockCons * 60;
-        timeStop = timeToStopCons * 60;
+        timeToStart = (int) (timeToStartCons * 60);
+        searchBeforeStart = (int) (searchBeforeStartCons * 60);
+        timeToOpen = (int) (timeToUnlockCons * 60);
+        timeStop = (int) (timeToStopCons * 60);
         airDropLocked = true;
         BAirDrop.hologram.remove(id);
         updateEditAirMenu("stats");
-        pickPreGenLocs = 0;
         if (kill) canceled = true;
         setUsePlayerLocation(false);
         summoner = false;
         if (antiSteal != null) {
             antiSteal.unregister();
             antiSteal = null;
+        }
+        if (decoyManager != null) {
+            decoyManager.unregister();
+            decoyManager = null;
         }
     }
 
@@ -684,10 +700,7 @@ public class CAirDrop implements AirDrop, StateSerializable {
                 public void run() {
                     try {
                         if (futureLocation == null) {
-                            if (usePreGeneratedLocations)
-                                futureLocation = generator.getPreLocation(CAirDropInstance);
-                            else
-                                futureLocation = generator.getLocation(CAirDropInstance, false);
+                            futureLocation = generator.getLocation(CAirDropInstance);
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -733,11 +746,6 @@ public class CAirDrop implements AirDrop, StateSerializable {
                 }
                 if (sb.indexOf("{!it-was-open}") != -1){
                     sb.replace(sb.indexOf("{!it-was-open}"), sb.indexOf("{!it-was-open}") + 14, String.valueOf(!wasOpened));
-                    b = true;
-                    continue;
-                }
-                if (sb.indexOf("{!use-pre-generated-locations}") != -1){
-                    sb.replace(sb.indexOf("{!use-pre-generated-locations}"), sb.indexOf("{!use-pre-generated-locations}") + 30, String.valueOf(!usePreGeneratedLocations));
                     b = true;
                     continue;
                 }
@@ -833,11 +841,6 @@ public class CAirDrop implements AirDrop, StateSerializable {
                 b = true;
                 continue;
             }
-            if (sb.indexOf("{use-pre-generated-locations}") != -1){
-                sb.replace(sb.indexOf("{use-pre-generated-locations}"), sb.indexOf("{use-pre-generated-locations}") + 29, String.valueOf(usePreGeneratedLocations));
-                b = true;
-                continue;
-            }
             if (sb.indexOf("{time-stop-event-must-go}") != -1){
                 sb.replace(sb.indexOf("{time-stop-event-must-go}"), sb.indexOf("{time-stop-event-must-go}") + 25, String.valueOf(timeStopEventMustGo));
                 b = true;
@@ -850,6 +853,11 @@ public class CAirDrop implements AirDrop, StateSerializable {
             }
             if (sb.indexOf("{flatness-check}") != -1){
                 sb.replace(sb.indexOf("{flatness-check}"), sb.indexOf("{flatness-check}") + 16, String.valueOf(flatnessCheck));
+                b = true;
+                continue;
+            }
+            if (sb.indexOf("{decoy-protection}") != -1){
+                sb.replace(sb.indexOf("{decoy-protection}"), sb.indexOf("{decoy-protection}") + 18, String.valueOf(decoyProtectionEnabled));
                 b = true;
                 continue;
             }
@@ -910,11 +918,6 @@ public class CAirDrop implements AirDrop, StateSerializable {
             }
             if (sb.indexOf("{material-unlocked}") != -1){
                 sb.replace(sb.indexOf("{material-unlocked}"), sb.indexOf("{material-unlocked}") + 19, String.valueOf(materialUnlocked));
-                b = true;
-                continue;
-            }
-            if (sb.indexOf("{world-loc}") != -1){
-                sb.replace(sb.indexOf("{world-loc}"), sb.indexOf("{world-loc}") + 11, String.valueOf(GeneratorLoc.getSizeLocForAirDrop(this)));
                 b = true;
                 continue;
             }
@@ -1152,7 +1155,7 @@ public class CAirDrop implements AirDrop, StateSerializable {
 
     @Override
     public Inventory getEditorItemsInventory(Inventory inv, String invName) {
-        Inventory inventory1 = Bukkit.createInventory(inv.getHolder(), inv.getSize(), Message.messageBuilder(invName));
+        Inventory inventory1 = Bukkit.createInventory(inv.getHolder(), inv.getSize(), Message.messageBuilderComponent(invName));
 
         for (Items items : getListItems().getOrDefault(invName, new ArrayList<>())) {
             ItemStack itemStack = items.getItem();
@@ -1594,16 +1597,6 @@ public class CAirDrop implements AirDrop, StateSerializable {
     }
 
     @Override
-    public int getPickPreGenLocs() {
-        return pickPreGenLocs;
-    }
-
-    @Override
-    public void setPickPreGenLocs(int pickPreGenLocs) {
-        this.pickPreGenLocs = pickPreGenLocs;
-    }
-
-    @Override
     public int getSpawnChance() {
         return spawnChance;
     }
@@ -1640,16 +1633,6 @@ public class CAirDrop implements AirDrop, StateSerializable {
     }
 
     @Override
-    public boolean isUsePreGeneratedLocations() {
-        return usePreGeneratedLocations;
-    }
-
-    @Override
-    public void setUsePreGeneratedLocations(boolean usePreGeneratedLocations) {
-        this.usePreGeneratedLocations = usePreGeneratedLocations;
-    }
-
-    @Override
     public boolean isFlatnessCheck() {
         return flatnessCheck;
     }
@@ -1660,42 +1643,42 @@ public class CAirDrop implements AirDrop, StateSerializable {
     }
 
     @Override
-    public int getTimeToStartCons() {
+    public double getTimeToStartCons() {
         return timeToStartCons;
     }
 
     @Override
-    public int getTimeToStopCons() {
+    public double getTimeToStopCons() {
         return timeToStopCons;
     }
 
     @Override
-    public int getTimeToUnlockCons() {
+    public double getTimeToUnlockCons() {
         return timeToUnlockCons;
     }
 
     @Override
-    public int getSearchBeforeStartCons() {
+    public double getSearchBeforeStartCons() {
         return searchBeforeStartCons;
     }
 
     @Override
-    public void setTimeToStartCons(int timeToStartCons) {
+    public void setTimeToStartCons(double timeToStartCons) {
         this.timeToStartCons = timeToStartCons;
     }
 
     @Override
-    public void setTimeToStopCons(int timeToStopCons) {
+    public void setTimeToStopCons(double timeToStopCons) {
         this.timeToStopCons = timeToStopCons;
     }
 
     @Override
-    public void setTimeToUnlockCons(int timeToUnlockCons) {
+    public void setTimeToUnlockCons(double timeToUnlockCons) {
         this.timeToUnlockCons = timeToUnlockCons;
     }
 
     @Override
-    public void setSearchBeforeStartCons(int searchBeforeStartCons) {
+    public void setSearchBeforeStartCons(double searchBeforeStartCons) {
         this.searchBeforeStartCons = searchBeforeStartCons;
     }
 
@@ -1707,7 +1690,7 @@ public class CAirDrop implements AirDrop, StateSerializable {
     @Override
     public void setInventoryTitle(String inventoryTitle) {
         this.inventoryTitle = inventoryTitle;
-        inventory = Bukkit.createInventory(null, inventorySize, Message.messageBuilder(inventoryTitle));
+        inventory = Bukkit.createInventory(null, inventorySize, Message.messageBuilderComponent(inventoryTitle));
     }
 
 
@@ -1968,7 +1951,6 @@ public class CAirDrop implements AirDrop, StateSerializable {
                 ", wasOpened=" + wasOpened +
                 ", airDropStarted=" + airDropStarted +
                 ", activated=" + activated +
-                ", usePreGeneratedLocations=" + usePreGeneratedLocations +
                 ", timeToStartCons=" + timeToStartCons +
                 ", timeToStopCons=" + timeToStopCons +
                 ", timeToUnlockCons=" + timeToUnlockCons +
@@ -1976,7 +1958,6 @@ public class CAirDrop implements AirDrop, StateSerializable {
                 ", flatnessCheck=" + flatnessCheck +
                 ", staticLocation=" + staticLocation +
                 ", useStaticLoc=" + useStaticLoc +
-                ", pickPreGenLocs=" + pickPreGenLocs +
                 ", spawnChance=" + spawnChance +
                 ", timeCountingEnabled=" + timeCountingEnabled +
                 ", generatorSettings='" + generatorSettings + '\'' +
@@ -2002,5 +1983,45 @@ public class CAirDrop implements AirDrop, StateSerializable {
 
     public List<String> getDec() {
         return dec;
+    }
+
+    @Override
+    public boolean isDecoyProtectionEnabled() {
+        return decoyProtectionEnabled;
+    }
+
+    @Override
+    public void setDecoyProtectionEnabled(boolean enabled) {
+        this.decoyProtectionEnabled = enabled;
+    }
+
+    @Override
+    public List<String> getDecoyFakeItems() {
+        return decoyFakeItems;
+    }
+
+    @Override
+    public void setDecoyFakeItems(List<String> items) {
+        this.decoyFakeItems = items;
+    }
+
+    @Override
+    public List<String> getDecoyFakeNames() {
+        return decoyFakeNames;
+    }
+
+    @Override
+    public void setDecoyFakeNames(List<String> names) {
+        this.decoyFakeNames = names;
+    }
+
+    @Override
+    public DecoyManager getDecoyManager() {
+        return decoyManager;
+    }
+
+    @Override
+    public void setDecoyManager(DecoyManager decoyManager) {
+        this.decoyManager = decoyManager;
     }
 }

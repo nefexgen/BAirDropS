@@ -26,7 +26,7 @@ public class ChangeMaterial implements Listener {
     private final boolean isMaterialLocked;
 
     public ChangeMaterial(AirDrop airDrop, boolean isMaterialLocked) {
-        this.inventory = Bukkit.createInventory(null, 54, Message.messageBuilder(String.format(BAirDrop.getConfigMessage().getMessage("mat-change-inv"), airDrop.getId())));
+        this.inventory = Bukkit.createInventory(null, 54, Message.messageBuilderComponent(String.format(BAirDrop.getConfigMessage().getMessage("mat-change-inv"), airDrop.getId())));
         this.airDrop = airDrop;
         this.isMaterialLocked = isMaterialLocked;
         generate();

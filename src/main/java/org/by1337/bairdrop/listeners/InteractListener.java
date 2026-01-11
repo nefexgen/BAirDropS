@@ -9,7 +9,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 
 import org.by1337.bairdrop.AirDrop;
-import org.by1337.bairdrop.BAirDrop;
 import org.by1337.bairdrop.api.event.AirDropOpenEvent;
 import org.by1337.bairdrop.customListeners.CustomEvent;
 import org.by1337.bairdrop.util.AirManager;
@@ -24,7 +23,7 @@ public class InteractListener implements Listener {
     @EventHandler
     public void PlayerClick(PlayerInteractEvent e) {
         Player pl = e.getPlayer();
-        if (e.getAction() == Action.RIGHT_CLICK_BLOCK || BAirDrop.getInstance().getConfig().getBoolean("geyser") && e.getClickedBlock() != null) {
+        if (e.getAction() == Action.RIGHT_CLICK_BLOCK && e.getClickedBlock() != null) {
             AirDrop airDrop = AirManager.getAirDropForLocation(e.getClickedBlock().getLocation());
 
             if(airDrop == null)
@@ -40,7 +39,7 @@ public class InteractListener implements Listener {
             }
             if(airDrop.isStartCountdownAfterClick() && !airDrop.isActivated()){
                 airDrop.setActivated(true);
-                airDrop.setTimeStop(airDrop.getTimeToStopCons() * 60);
+                airDrop.setTimeStop((int) (airDrop.getTimeToStopCons() * 60));
                 airDrop.notifyObservers(CustomEvent.ACTIVATE, pl);
                 return;
             }
@@ -52,8 +51,12 @@ public class InteractListener implements Listener {
                 Bukkit.getServer().getPluginManager().callEvent(airDropOpenEvent);
                 if(airDropOpenEvent.isCancelled())
                     return;
-                if (DecoyManager.isEnabled()) {
-                    DecoyManager decoyManager = new DecoyManager(airDrop);
+                if (DecoyManager.isEnabled(airDrop)) {
+                    DecoyManager decoyManager = airDrop.getDecoyManager();
+                    if (decoyManager == null) {
+                        decoyManager = new DecoyManager(airDrop);
+                        airDrop.setDecoyManager(decoyManager);
+                    }
                     Inventory decoyInventory = decoyManager.createDecoyInventory(pl);
                     pl.openInventory(decoyInventory);
                 } else {

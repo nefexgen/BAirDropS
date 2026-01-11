@@ -115,13 +115,11 @@ public class CSummonerItem implements SummonerItem {
             air = BAirDrop.airDrops.getOrDefault(key, null);
         }
         if (air == null){
-            Message.error(String.format(BAirDrop.getConfigMessage().getMessage("unknown-airdrop"), key));
-            Message.sendMsg(pl, BAirDrop.getConfigMessage().getMessage("impossible-to-call"));
+            Message.sendMsg(pl, String.format(BAirDrop.getConfigMessage().getMessage("unknown-airdrop"), key));
             pl.setCooldown(getItem().getType(), 40);
             return null;
         }
         if (air.isAirDropStarted()){
-            Message.error(BAirDrop.getConfigMessage().getMessage("summoner-error-it-airdrop-is-already-started") + "(airdrop: " + key + ")");
             Message.sendMsg(pl, BAirDrop.getConfigMessage().getMessage("summoner-error-it-airdrop-is-already-started"));
             pl.setCooldown(getItem().getType(), 40);
             return null;

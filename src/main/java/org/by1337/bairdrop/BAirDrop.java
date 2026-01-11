@@ -4,7 +4,6 @@ import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
-import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -15,8 +14,6 @@ import org.by1337.bairdrop.hologram.*;
 import org.by1337.bairdrop.listeners.Compass;
 import org.by1337.bairdrop.listeners.CraftItem;
 import org.by1337.bairdrop.listeners.InteractListener;
-import org.by1337.bairdrop.locationGenerator.CGenLoc;
-import org.by1337.bairdrop.locationGenerator.GeneratorLoc;
 import org.by1337.bairdrop.summoner.Summoner;
 import org.by1337.bairdrop.worldGuardHook.RegionManager;
 import org.by1337.bairdrop.command.Commands;
@@ -58,8 +55,6 @@ public final class BAirDrop extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        ConfigurationSerialization.registerClass(CGenLoc.class);
-
         EffectDeserialize.register(Circle.class);
         EffectDeserialize.register(ExpandingCircle.class);
         EffectDeserialize.register(FireworkEffect.class);
@@ -178,7 +173,6 @@ public final class BAirDrop extends JavaPlugin {
             airDrop.schematicsUndo();
             RegionManager.RemoveRegion(airDrop);
         }
-        GeneratorLoc.save();
         CustomCraft.unloadCrafts();
 
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null)
@@ -211,7 +205,6 @@ public final class BAirDrop extends JavaPlugin {
 
         getInstance().reloadConfig();
         compass.loadItem();
-        GeneratorLoc.locs.clear();
         summoner.LoadSummoner();
         if (globalTimer != null) {
             if (!BAirDrop.getInstance().getConfig().getBoolean("global-time.enable")) {

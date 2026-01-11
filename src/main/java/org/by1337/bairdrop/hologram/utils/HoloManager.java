@@ -1,8 +1,7 @@
 package org.by1337.bairdrop.hologram.utils;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.by1337.bairdrop.hologram.utils.impl.*;
+import org.by1337.bairdrop.hologram.utils.impl.HoloLineV1_21;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -52,25 +51,7 @@ public class HoloManager {
     }
 
     private void create(String line, Location location) {
-        HoloLine holoLine;
-        String version = Bukkit.getServer().getBukkitVersion();
-        if (version.contains("1.21")) {
-            holoLine = new HoloLineV1_21(line, location);
-        } else if (version.contains("1.20")) {
-            holoLine = new HoloLineV1_20(line, location);
-        } else if (version.contains("1.19.4") || version.contains("1.19.3")) {
-            holoLine = new HoloLineV1_19_4(line, location);
-        } else if (version.contains("1.19.2") || version.contains("1.19.1") || version.contains("1.19")) {
-            holoLine = new HoloLineV1_19_2(line, location);
-        } else if (version.contains("1.18")) {
-            holoLine = new HoloLineV1_18(line, location);
-        } else if (version.contains("1.17")) {
-            holoLine = new HoloLineV1_17(line, location);
-        } else if (version.contains("1.16")) {
-            holoLine = new HoloLineV1_16(line, location);
-        } else {
-            holoLine = new HoloLineV1_21(line, location);
-        }
+        HoloLine holoLine = new HoloLineV1_21(line, location);
         holoLine.spawn();
         lines.add(holoLine);
     }

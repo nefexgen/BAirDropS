@@ -16,6 +16,7 @@ import org.by1337.bairdrop.effect.IEffect;
 import org.by1337.bairdrop.menu.AddingItems;
 import org.by1337.bairdrop.menu.EditAirMenu;
 import org.by1337.bairdrop.ItemUtil.Items;
+import org.by1337.bairdrop.util.DecoyManager;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -358,10 +359,6 @@ public interface AirDrop extends Observable {
 
     void setUseStaticLoc(boolean useStaticLoc);
 
-    int getPickPreGenLocs();
-
-    void setPickPreGenLocs(int pickPreGenLocs);
-
     int getSpawnChance();
 
     void setTimeCountingEnabled(boolean timeCountingEnabled);
@@ -377,29 +374,25 @@ public interface AirDrop extends Observable {
 
     void setActivated(boolean activated);
 
-    boolean isUsePreGeneratedLocations();
-
-    void setUsePreGeneratedLocations(boolean usePreGeneratedLocations);
-
     boolean isFlatnessCheck();
 
     void setFlatnessCheck(boolean flatnessCheck);
 
-    int getTimeToStartCons();
+    double getTimeToStartCons();
 
-    int getTimeToStopCons();
+    double getTimeToStopCons();
 
-    int getTimeToUnlockCons();
+    double getTimeToUnlockCons();
 
-    int getSearchBeforeStartCons();
+    double getSearchBeforeStartCons();
 
-    void setTimeToStartCons(int timeToStartCons);
+    void setTimeToStartCons(double timeToStartCons);
 
-    void setTimeToStopCons(int timeToStopCons);
+    void setTimeToStopCons(double timeToStopCons);
 
-    void setTimeToUnlockCons(int timeToUnlockCons);
+    void setTimeToUnlockCons(double timeToUnlockCons);
 
-    void setSearchBeforeStartCons(int searchBeforeStartCons);
+    void setSearchBeforeStartCons(double searchBeforeStartCons);
 
     String getInventoryTitle();
 
@@ -498,4 +491,13 @@ public interface AirDrop extends Observable {
 
     void addDec(String... s);
     List<String> getDec();
+
+    boolean isDecoyProtectionEnabled();
+    void setDecoyProtectionEnabled(boolean enabled);
+    List<String> getDecoyFakeItems();
+    void setDecoyFakeItems(List<String> items);
+    List<String> getDecoyFakeNames();
+    void setDecoyFakeNames(List<String> names);
+    DecoyManager getDecoyManager();
+    void setDecoyManager(DecoyManager decoyManager);
 }

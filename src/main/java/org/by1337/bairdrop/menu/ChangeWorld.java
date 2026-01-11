@@ -28,7 +28,7 @@ public class ChangeWorld implements Listener {
 
     public ChangeWorld(AirDrop airDrop) {
         this.airDrop = airDrop;
-        inventory = Bukkit.createInventory(null, 54, Message.messageBuilder(BAirDrop.getConfigMessage().getMessage("change-world-inv-name")));
+        inventory = Bukkit.createInventory(null, 54, Message.messageBuilderComponent(BAirDrop.getConfigMessage().getMessage("change-world-inv-name")));
         generate();
     }
     private void generate(){

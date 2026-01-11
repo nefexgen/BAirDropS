@@ -4,13 +4,10 @@ import org.bukkit.*;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.util.Vector;
 import org.by1337.bairdrop.BAirDrop;
 import org.by1337.bairdrop.ItemUtil.EnchantInfo;
 import org.by1337.bairdrop.ItemUtil.EnchantMaterial;
 import org.by1337.bairdrop.listeners.Compass;
-import org.by1337.bairdrop.locationGenerator.CGenLoc;
-import org.by1337.bairdrop.locationGenerator.GenLoc;
 import org.by1337.bairdrop.worldGuardHook.RegionManager;
 import org.by1337.bairdrop.customListeners.CustomEvent;
 import org.by1337.bairdrop.customListeners.CustomEventListener;
@@ -25,7 +22,6 @@ import java.util.*;
 
 import static org.by1337.bairdrop.BAirDrop.getInstance;
 import static org.by1337.bairdrop.BAirDrop.summoner;
-import static org.by1337.bairdrop.locationGenerator.GeneratorLoc.locs;
 import static org.by1337.bairdrop.effect.LoadEffects.LoadEffect;
 
 
@@ -34,8 +30,6 @@ public class CConfig implements Config, ConfigMessage {
     private File fileListeners;
     private FileConfiguration effects;
     private File fileEffects;
-    private FileConfiguration locations;
-    private File fileLocations;
     private FileConfiguration menu;
     private File fileMenu;
     private FileConfiguration schemConf;
@@ -53,77 +47,64 @@ public class CConfig implements Config, ConfigMessage {
     public void loadConfiguration() {
         language = getInstance().getConfig().getString("language", "en");
         
-        initTranslations();
+        initLang();
+        initGlobalConfigs();
         
-        fileMenu = new File(getInstance().getDataFolder() + File.separator + "translations" + File.separator + language + File.separator + "menu.yml");
+        fileMenu = new File(getInstance().getDataFolder() + File.separator + "lang" + File.separator + language + File.separator + "menu.yml");
         if (!fileMenu.exists()) {
-            fileMenu = new File(getInstance().getDataFolder() + File.separator + "translations" + File.separator + "en" + File.separator + "menu.yml");
+            fileMenu = new File(getInstance().getDataFolder() + File.separator + "lang" + File.separator + "en" + File.separator + "menu.yml");
         }
         menu = YamlConfiguration.loadConfiguration(fileMenu);
 
-
-        fileGeneratorSettings = new File(getInstance().getDataFolder() + File.separator + "translations" + File.separator + language + File.separator + "generatorSettings.yml");
+        fileGeneratorSettings = new File(getInstance().getDataFolder() + File.separator + "generators.yml");
         if (!fileGeneratorSettings.exists()) {
-            fileGeneratorSettings = new File(getInstance().getDataFolder() + File.separator + "translations" + File.separator + "en" + File.separator + "generatorSettings.yml");
+            getInstance().saveResource("generators.yml", false);
         }
         generatorSettings = YamlConfiguration.loadConfiguration(fileGeneratorSettings);
 
-        File shemDir = new File(getInstance().getDataFolder() + File.separator + "Schematics");
+        File shemDir = new File(getInstance().getDataFolder() + File.separator + "schematics");
         if (!shemDir.exists()) {
             shemDir.mkdir();
         }
 
-        fileSchemConf = new File(getInstance().getDataFolder() + File.separator + "Schematics" + File.separator + "schemConf.yml");
+        fileSchemConf = new File(getInstance().getDataFolder() + File.separator + "schematics" + File.separator + "schemConfig.yml");
         if (!fileSchemConf.exists()) {
-            getInstance().saveResource("Schematics" + File.separator + "schemConf.yml", true);
+            copyResource("schematics/schemConfig.yml", fileSchemConf);
         }
         schemConf = YamlConfiguration.loadConfiguration(fileSchemConf);
 
-
-        for (File shemFile : Arrays.stream(Objects.requireNonNull(shemDir.listFiles())).toList()) {
-            if (shemFile.getAbsolutePath().equals(fileSchemConf.getAbsolutePath()))
-                continue;
-            Message.debug("load schematics" + shemFile.getAbsolutePath(), LogLevel.LOW);
-            Schematics.put(shemFile.getName(), shemFile);
+        File[] shemFiles = shemDir.listFiles();
+        if (shemFiles != null) {
+            for (File shemFile : shemFiles) {
+                if (shemFile.getAbsolutePath().equals(fileSchemConf.getAbsolutePath()))
+                    continue;
+                Message.debug("load schematics " + shemFile.getAbsolutePath(), LogLevel.LOW);
+                Schematics.put(shemFile.getName(), shemFile);
+            }
         }
 
-
-        fileEffects = new File(getInstance().getDataFolder() + File.separator + "translations" + File.separator + language + File.separator + "effects.yml");
+        fileEffects = new File(getInstance().getDataFolder() + File.separator + "effects.yml");
         if (!fileEffects.exists()) {
-            fileEffects = new File(getInstance().getDataFolder() + File.separator + "translations" + File.separator + "en" + File.separator + "effects.yml");
+            getInstance().saveResource("effects.yml", false);
         }
         effects = YamlConfiguration.loadConfiguration(fileEffects);
 
-        fileLocations = new File(getInstance().getDataFolder() + File.separator + "locations.yml");
-        if (!fileLocations.exists()) {
-            getInstance().saveResource("locations.yml", true);
-        }
-        locations = YamlConfiguration.loadConfiguration(fileLocations);
-
-        fileListeners = new File(getInstance().getDataFolder() + File.separator + "translations" + File.separator + language + File.separator + "listeners.yml");
+        fileListeners = new File(getInstance().getDataFolder() + File.separator + "lang" + File.separator + language + File.separator + "listeners.yml");
         if (!fileListeners.exists()) {
-            fileListeners = new File(getInstance().getDataFolder() + File.separator + "translations" + File.separator + "en" + File.separator + "listeners.yml");
+            fileListeners = new File(getInstance().getDataFolder() + File.separator + "lang" + File.separator + "en" + File.separator + "listeners.yml");
         }
         listeners = YamlConfiguration.loadConfiguration(fileListeners);
 
-
-        fileMessage = new File(getInstance().getDataFolder() + File.separator + "translations" + File.separator + language + File.separator + "message.yml");
+        fileMessage = new File(getInstance().getDataFolder() + File.separator + "lang" + File.separator + language + File.separator + "messages.yml");
         if (!fileMessage.exists()) {
-            fileMessage = new File(getInstance().getDataFolder() + File.separator + "translations" + File.separator + "en" + File.separator + "message.yml");
+            fileMessage = new File(getInstance().getDataFolder() + File.separator + "lang" + File.separator + "en" + File.separator + "messages.yml");
         }
         message = YamlConfiguration.loadConfiguration(fileMessage);
-
 
         File dir = new File(getInstance().getDataFolder() + File.separator + "airdrops");
         if (!dir.exists()) {
             dir.mkdir();
-            File defaultAirdrop = new File(dir, "default.yml");
-            File translatedDefault = new File(getInstance().getDataFolder() + File.separator + "translations" + File.separator + language + File.separator + "airdrops" + File.separator + "default.yml");
-            if (translatedDefault.exists()) {
-                copyFile(translatedDefault, defaultAirdrop);
-            } else {
-                getInstance().saveResource("airdrops" + File.separator + "default.yml", true);
-            }
+            getInstance().saveResource("airdrops" + File.separator + "default.yml", false);
         }
         File dir2 = new File(getInstance().getDataFolder() + File.separator + "scripts");//diamond.js
         if (!dir2.exists()) {
@@ -144,7 +125,6 @@ public class CConfig implements Config, ConfigMessage {
         BAirDrop.customEventListeners.clear();
         loadListeners();
         loadMenu();
-        loadLocations();
         LoadEffect(effects);
         RegionManager.LoadFlags();
         loadEnchant();
@@ -341,13 +321,16 @@ public class CConfig implements Config, ConfigMessage {
 
     @Nullable
     public String getMessageFromPlugin(String path) {
-        InputStream resourceStream = getInstance().getResource("message.yml");
+        InputStream resourceStream = getInstance().getResource("lang/" + language + "/messages.yml");
+        if (resourceStream == null) {
+            resourceStream = getInstance().getResource("lang/en/messages.yml");
+        }
         if (resourceStream == null) {
             return null;
         }
         File tempFile;
         try {
-            tempFile = File.createTempFile("message", ".yml");
+            tempFile = File.createTempFile("messages", ".yml");
         } catch (IOException e) {
             return null;
         }
@@ -388,13 +371,16 @@ public class CConfig implements Config, ConfigMessage {
 
     @NotNull
     public List<String> getListFromPlugin(String path) {
-        InputStream resourceStream = getInstance().getResource("message.yml");
+        InputStream resourceStream = getInstance().getResource("lang/" + language + "/messages.yml");
+        if (resourceStream == null) {
+            resourceStream = getInstance().getResource("lang/en/messages.yml");
+        }
         if (resourceStream == null) {
             return new ArrayList<>();
         }
         File tempFile;
         try {
-            tempFile = File.createTempFile("message", ".yml");
+            tempFile = File.createTempFile("messages", ".yml");
         } catch (IOException e) {
             return new ArrayList<>();
         }
@@ -420,50 +406,6 @@ public class CConfig implements Config, ConfigMessage {
         return new ArrayList<>(file.getStringList(path));
     }
 
-    public void loadLocations() {
-        if (locations.getConfigurationSection("locations") == null)
-            return;
-
-        for (String airId : locations.getConfigurationSection("locations").getKeys(false)) {
-            world:
-            for (String world : locations.getConfigurationSection(String.format("locations.%s", airId)).getKeys(false)) {
-                for (String uuid : locations.getConfigurationSection(String.format("locations.%s.%s", airId, world)).getKeys(false)) {
-                    if (locations.getInt("version") == 0) {
-                        if (!loadOldLoc(airId, world, uuid)) {
-                            continue world;
-                        }
-                    } else {
-                        GenLoc genLoc = locations.getSerializable(String.format("locations.%s.%s.%s", airId, world, uuid), CGenLoc.class);
-                        List<GenLoc> list = locs.getOrDefault(airId, new ArrayList<>());
-                        list.add(genLoc);
-                        locs.put(airId, list);
-                    }
-                }
-            }
-        }
-    }
-
-    @Deprecated
-    public boolean loadOldLoc(String airId, String world, String uuid) {
-        int offsetsX = locations.getInt(String.format("locations.%s.%s.%s.offsets-x", airId, world, uuid));
-        int offsetsY = locations.getInt(String.format("locations.%s.%s.%s.offsets-y", airId, world, uuid));
-        int offsetsZ = locations.getInt(String.format("locations.%s.%s.%s.offsets-z", airId, world, uuid));
-        int x = locations.getInt(String.format("locations.%s.%s.%s.x", airId, world, uuid));
-        int y = locations.getInt(String.format("locations.%s.%s.%s.y", airId, world, uuid));
-        int z = locations.getInt(String.format("locations.%s.%s.%s.z", airId, world, uuid));
-        World world1 = Bukkit.getWorld(world);
-        if (world1 == null) {
-            Message.error(String.format(getMessage("gen-loc-world-is-null"), world));
-            return false;
-        }
-        Location location = new Location(world1, x, y, z);
-
-        if (!locs.containsKey(airId))
-            locs.put(airId, new ArrayList<>());
-        locs.getOrDefault(airId, new ArrayList<>()).add(new CGenLoc(location, new Vector(offsetsX, offsetsY, offsetsZ), airId, UUID.fromString(uuid)));
-        return true;
-    }
-
     public HashMap<File, FileConfiguration> getAirDrops() {
         return airDrops;
     }
@@ -486,14 +428,6 @@ public class CConfig implements Config, ConfigMessage {
 
     public File getFileEffects() {
         return fileEffects;
-    }
-
-    public FileConfiguration getLocations() {
-        return locations;
-    }
-
-    public File getFileLocations() {
-        return fileLocations;
     }
 
     public FileConfiguration getMenu() {
@@ -536,39 +470,49 @@ public class CConfig implements Config, ConfigMessage {
         return generatorSettings;
     }
 
-    private void initTranslations() {
-        File translationsDir = new File(getInstance().getDataFolder() + File.separator + "translations");
-        if (!translationsDir.exists()) {
-            translationsDir.mkdirs();
+    private void initLang() {
+        File langDir = new File(getInstance().getDataFolder() + File.separator + "lang");
+        if (!langDir.exists()) {
+            langDir.mkdirs();
         }
         
         String[] languages = {"en", "ru"};
-        String[] translationFiles = {"message.yml", "menu.yml", "listeners.yml", "effects.yml", "generatorSettings.yml"};
-        String[] translationDirs = {"airdrops"};
+        String[] langFiles = {"messages.yml", "menu.yml", "listeners.yml"};
         
         for (String lang : languages) {
-            File langDir = new File(translationsDir, lang);
-            if (!langDir.exists()) {
-                langDir.mkdirs();
+            File dir = new File(langDir, lang);
+            if (!dir.exists()) {
+                dir.mkdirs();
             }
-            for (String fileName : translationFiles) {
-                File file = new File(langDir, fileName);
+            for (String fileName : langFiles) {
+                File file = new File(dir, fileName);
                 if (!file.exists()) {
-                    copyResource("translations/" + lang + "/" + fileName, file);
-                }
-            }
-            for (String dirName : translationDirs) {
-                File dir = new File(langDir, dirName);
-                if (!dir.exists()) {
-                    dir.mkdirs();
-                }
-                File defaultFile = new File(dir, "default.yml");
-                if (!defaultFile.exists()) {
-                    copyResource("translations/" + lang + "/" + dirName + "/default.yml", defaultFile);
+                    copyResource("lang/" + lang + "/" + fileName, file);
                 }
             }
         }
         Message.logger("[BAirDropS] Language: " + language);
+    }
+    
+    private void initGlobalConfigs() {
+        File effectsFile = new File(getInstance().getDataFolder() + File.separator + "effects.yml");
+        if (!effectsFile.exists()) {
+            getInstance().saveResource("effects.yml", false);
+        }
+        
+        File generatorsFile = new File(getInstance().getDataFolder() + File.separator + "generators.yml");
+        if (!generatorsFile.exists()) {
+            getInstance().saveResource("generators.yml", false);
+        }
+        
+        File schematicsDir = new File(getInstance().getDataFolder() + File.separator + "schematics");
+        if (!schematicsDir.exists()) {
+            schematicsDir.mkdirs();
+        }
+        File schemConfigFile = new File(schematicsDir, "schemConfig.yml");
+        if (!schemConfigFile.exists()) {
+            copyResource("schematics/schemConfig.yml", schemConfigFile);
+        }
     }
     
     private void copyResource(String resourcePath, File outFile) {
@@ -589,19 +533,6 @@ public class CConfig implements Config, ConfigMessage {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
-    }
-    
-    private void copyFile(File source, File dest) {
-        try (FileInputStream in = new FileInputStream(source);
-             FileOutputStream out = new FileOutputStream(dest)) {
-            byte[] buffer = new byte[1024];
-            int len;
-            while ((len = in.read(buffer)) != -1) {
-                out.write(buffer, 0, len);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 

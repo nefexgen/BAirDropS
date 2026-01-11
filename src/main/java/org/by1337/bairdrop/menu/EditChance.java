@@ -38,7 +38,7 @@ public class EditChance implements Listener {
         editChance = this;
         this.airDrop = airDrop;
         this.invName = invName;
-        inv = Bukkit.createInventory(null, airDrop.getInventorySize(), airDrop.getId());
+        inv = Bukkit.createInventory(null, airDrop.getInventorySize(), Message.messageBuilderComponent(airDrop.getId()));
 
         for(Items items : airDrop.getListItems().getOrDefault(invName, new ArrayList<>())){
             ItemStack item = items.getItem();

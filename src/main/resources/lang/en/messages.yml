@@ -1,8 +1,8 @@
 air-loaded: '&aAirdrop {id} loaded!'
 inv-edit: '&7Editing items for airdrop {id}'
 slot-more: 'There are {size} items in slot {slot} of airdrop {id}!'
-item-error: '&cNo items in slot {slot}!'
-item-null: '&cItem in slot {slot} is null! It was skipped!'
+item-error: 'No items in slot {slot}!'
+item-null: 'Item in slot {slot} is null! It was skipped!'
 event-is-not-active: '&fAirdrop &cis not active'
 click-to-activate: '&aClick to activate'
 event-is-active: '&fAirdrop &ais active'
@@ -149,6 +149,7 @@ air-near-none: '&cNo active airdrops'
 get-item: '{PP} &fPlayer %s has been given %s x%s'
 unknown-player: '{PP} &cUnknown player!'
 airdrop-crated: '&aAirdrop created!'
+airdrop-already-exists: '&cAirdrop with this ID already exists!'
 edit-list: '&a▶ LMB &8- &7Edit this list'
 list-size: '&7Items: &e%s'
 create-new-list: '&aCreate new'
@@ -234,10 +235,10 @@ select-air-menu-lore:
 menu-air-select: 'Airdrop selection menu'
 lidded-error: 'Block cannot be opened/closed!'
 rotate-error: 'This block cannot be rotated'
-anti-steal-limit-speed: "&cYou're taking items from the chest too fast!"
+anti-steal-limit-speed: "&cYou're taking items from the airdrop too fast!"
 inventory-full: "&cYour inventory is full!"
 effect-replace-error: 'An effect with this id already exists! %s'
 summoner-min-y: '&cAirdrop can be summoned no lower than %s height!'
 summoner-max-y: '&cAirdrop can be summoned no higher than %s height!'
 summoner-error-it-airdrop-is-already-started: "&cCannot summon this airdrop, as it is already started"
-dec-info: '&7Summoned: %s'
+dec-info: '&7Summoned: &6%s'

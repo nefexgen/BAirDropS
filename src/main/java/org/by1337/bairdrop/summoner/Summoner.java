@@ -37,7 +37,7 @@ public class Summoner implements Listener {
 
     public void LoadSummoner() {
         items.clear();
-        cooldown = BAirDrop.getInstance().getConfig().getInt("summoner-сooldown");
+        cooldown = BAirDrop.getInstance().getConfig().getInt("summoner-cooldown");
         if (BAirDrop.getInstance().getConfig().getConfigurationSection("summoner") == null)
             return;
         for (String key : BAirDrop.getInstance().getConfig().getConfigurationSection("summoner").getKeys(false)) {
@@ -89,7 +89,7 @@ public class Summoner implements Listener {
 
     @EventHandler
     public void onInteract(PlayerInteractEvent e) {
-        if (e.getAction() == Action.RIGHT_CLICK_BLOCK || BAirDrop.getInstance().getConfig().getBoolean("geyser")) {
+        if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
             ItemStack item = e.getPlayer().getInventory().getItemInMainHand();
             ItemMeta im = item.getItemMeta();
             if (im == null) return;

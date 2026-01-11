@@ -17,7 +17,6 @@ import org.by1337.bairdrop.BAirDrop;
 import org.by1337.bairdrop.customListeners.observer.Observer;
 import org.by1337.bairdrop.scripts.JsScript;
 import org.by1337.bairdrop.util.ExecuteCommands;
-import org.by1337.bairdrop.util.LogLevel;
 import org.by1337.bairdrop.util.Message;
 import org.jetbrains.annotations.NotNull;
 

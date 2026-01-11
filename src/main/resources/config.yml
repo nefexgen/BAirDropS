@@ -1,34 +1,30 @@
-# Updated v1.1.1 by Storm (Discord: stormsms)
+# ╔════════════════════════════════════════════════════════════════════════════╗
+# ║                              BAirDropS v1.1.2                              ║
+# ║                        by Storm (Discord: stormsms)                        ║
+# ╚════════════════════════════════════════════════════════════════════════════╝
 
-language: ru # en, ru
+# ┌────────────────────────────────────────────────┐
+# │               Основные настройки               │
+# └────────────────────────────────────────────────┘
 
-geyser: false
-max-experience-pre-generated-location: 50
-use-metrics: true
+language: ru # ru/en
+use-metrics: false
 debug: false
 log-level: LOW
 state-serializable: true
+
 anti-steal:
   enable: true
   show-message: true
-  show-cooldown-on-click: true # Отображать кулдаун при каждом нажатии на предмет
-  max-interval: 5 #ms
+  show-cooldown-on-click: true
+  max-interval: 5
   max-warnings: 5
-  min-interval-to-ignore: 250 #ms
-  сooldown: 200 #ms
+  min-interval-to-ignore: 250
+  cooldown: 200            # мс
 
-decoy-protection:
+global-time:
   enable: false
-  fake-items:
-    - GUNPOWDER
-    - PHANTOM_MEMBRANE
-    - NAUTILUS_SHELL
-    - GRAY_DYE
-  fake-names:
-    - '&eКость пирата'
-    - '&6Рога мамонта'
-    - '&6Битая ваза'
-    - '&cБогатое сокровище'
+  time: 90
 
 settings:
   world-guard-flags:
@@ -42,19 +38,23 @@ settings:
       - fire-spread
       - lava-fire
       - other-explosion
-global-time:
-  enable: false
-  time: 90
-summoner-сooldown: 1200
+
+# ┌────────────────────────────────────────────────┐
+# │              Призывающие аирдропы              │
+# └────────────────────────────────────────────────┘
+
+summoner-cooldown: 1200    # в тиках
+
 summoner:
+  # Пример предмета 1
   item-1:
-    nbt: null
     material: SOUL_CAMPFIRE
-    name: '&aAirdrop beacon'
+    name: '&aМаяк аирдропа'
     lore:
-      - '&7line 1'
-      - '&7line 2'
-    airdrop: RANDOM
+      - '&7ПКМ чтобы призвать'
+      - '&7аирдроп на вашу позицию'
+    nbt: null
+    airdrop: RANDOM        # ID аирдропа или RANDOM
     clone: true
     use-player-location: true
     check-up-blocks: false
@@ -63,26 +63,33 @@ summoner:
     min-y: 0
     max-y: 0
     call: []
+
+  # Пример предмета 2
   item-2:
-    nbt: null
     material: SOUL_CAMPFIRE
-    name: '&aAirdrop beacon'
+    name: '&aМаяк аирдропа'
     lore:
-      - '&7line 1'
-      - '&7line 2'
+      - '&7ПКМ чтобы призвать'
+      - '&7аирдроп в случайном месте'
+    nbt: null
     airdrop: RANDOM
     clone: true
-    flatness-check: false
     use-player-location: false
+    flatness-check: false
     ignore-region: false
     min-y: 0
     max-y: 0
     call: []
+
+# ┌────────────────────────────────────────────────┐
+# │                Кастомные крафты                │
+# └────────────────────────────────────────────────┘
+
 custom-crafts:
   enable: false
   crafts:
     craft-1:
-      summoner: item-1
+      summoner: item-1     # ID предмета из секции выше
       ingredients:
         A: DIAMOND
         B: BEDROCK
@@ -90,32 +97,45 @@ custom-crafts:
         top: AAA
         middle: ABA
         bottom: AAA
+
+# ┌────────────────────────────────────────────────┐
+# │                Компас аирдропов                │
+# └────────────────────────────────────────────────┘
+
 compass:
   material: COMPASS
-  item-name: '&aCompass'
-  item-lore: '&7Points the way to the nearest airdrop.'
+  item-name: '&aКомпас аирдропов'
+  item-lore: '&7Указывает на ближайший аирдроп'
   line-max-distance: 10
   particle-step: 0.2
-  particle-color: '255:0:0'
+  particle-color: '255:0:0'  # Формат RGB
   particle-size: 3
-  message-not-found: '&cThere are currently no active airdrops! &7The next one will be available in %bairdrop_time_start_format%.'
+  message-not-found: '&cНет активных аирдропов! &7Следующий через %bairdrop_time_start_format%'
   message-found: null
+
+# ┌────────────────────────────────────────────────┐
+# │                Авто зачарование                │
+# └────────────────────────────────────────────────┘
 
 auto-enchant:
   enable: false
-  en1: # Что угодно в имени
-    material: NETHERITE_PICKAXE # Материал предмета который нужно зачаровать
-    efficiency: #зачарование
-      chance: 70 #Шанс чара
-      min-level: 2 #Минимальный и максимальный уровень чара
+  
+  # Пример: Незеритовая кирка с эффективностью/удачей
+  pickaxe-fortune:
+    material: NETHERITE_PICKAXE
+    efficiency:
+      chance: 70           # % шанс применения
+      min-level: 2
       max-level: 5
     fortune:
       chance: 30
       min-level: 1
       max-level: 2
-    conflict-enchant: #Конфликтующие чары
+    conflict-enchant:      # Не применится если есть эти чары
       - silk_touch
-  en2:
+  
+  # Пример: Незеритовая кирка с шёлковым касанием
+  pickaxe-silk:
     material: NETHERITE_PICKAXE
     silk_touch:
       chance: 70

@@ -1,10 +1,14 @@
 var Material = Packages.org.bukkit.Material;
-var Enchantment = Packages.org.bukkit.enchantments.Enchantment;
 var ItemStack = Packages.org.bukkit.inventory.ItemStack;
+var Registry = Packages.org.bukkit.Registry;
+var NamespacedKey = Packages.org.bukkit.NamespacedKey;
 
 var itemStack = new ItemStack(Material.DIAMOND); //Create an ItemStack
 var itemMeta = itemStack.getItemMeta(); //Get ItemMeta from it
-itemMeta.addEnchant(Enchantment.ARROW_DAMAGE, 3, true); //add enchantment to ItemMeta
+var powerEnchant = Registry.ENCHANTMENT.get(NamespacedKey.minecraft("power")); //Get enchantment from registry
+if (powerEnchant != null) {
+    itemMeta.addEnchant(powerEnchant, 3, true); //add enchantment to ItemMeta
+}
 itemStack.setItemMeta(itemMeta); //Setting the item's ItemMeta
 player.getInventory().addItem(itemStack); //give him an item
 

@@ -54,14 +54,17 @@ public class AirDropUtils {
 
     @Nullable
     public static AirDrop getRandomCloneAir() {
-        List<AirDrop> airDrops = new ArrayList<>(BAirDrop.airDrops.values());
-        Comparator<AirDrop> airDropComparator = Comparator.comparingInt(AirDrop::getSpawnChance);
-        airDrops.sort(airDropComparator);
-        Random random = new Random();
-        for (AirDrop airDrop : airDrops) {
+        List<AirDrop> available = new ArrayList<>();
+        for (AirDrop airDrop : BAirDrop.airDrops.values()) {
             if (airDrop.isUseOnlyStaticLoc() || airDrop.isClone() || airDrop.isAirDropStarted() || (Bukkit.getOnlinePlayers().size() < airDrop.getMinPlayersToStart())) {
                 continue;
             }
+            available.add(airDrop);
+        }
+        if (available.isEmpty()) return null;
+        
+        Random random = new Random();
+        for (AirDrop airDrop : available) {
             if (random.nextInt(100) <= airDrop.getSpawnChance()) {
                 String newid = airDrop.getId() + "_" + UUID.randomUUID();
                 AirDrop clone = airDrop.clone(newid);
@@ -70,24 +73,32 @@ public class AirDropUtils {
                 return clone;
             }
         }
-        return null;
+        AirDrop fallback = available.get(random.nextInt(available.size()));
+        String newid = fallback.getId() + "_" + UUID.randomUUID();
+        AirDrop clone = fallback.clone(newid);
+        clone.setClone(true);
+        clone.setKill(true);
+        return clone;
     }
 
     @Nullable
     public static AirDrop getRandomAir() {
-        List<AirDrop> airDrops = new ArrayList<>(BAirDrop.airDrops.values());
-        Comparator<AirDrop> airDropComparator = Comparator.comparingInt(AirDrop::getSpawnChance);
-        airDrops.sort(airDropComparator);
-        Random random = new Random();
-        for (AirDrop airDrop : airDrops) {
+        List<AirDrop> available = new ArrayList<>();
+        for (AirDrop airDrop : BAirDrop.airDrops.values()) {
             if (airDrop.isUseOnlyStaticLoc() || airDrop.isClone() || airDrop.isAirDropStarted() || (Bukkit.getOnlinePlayers().size() < airDrop.getMinPlayersToStart())) {
                 continue;
             }
+            available.add(airDrop);
+        }
+        if (available.isEmpty()) return null;
+        
+        Random random = new Random();
+        for (AirDrop airDrop : available) {
             if (random.nextInt(100) <= airDrop.getSpawnChance()) {
                 return airDrop;
             }
         }
-        return null;
+        return available.get(random.nextInt(available.size()));
     }
 
     private static String getResult(String s) {

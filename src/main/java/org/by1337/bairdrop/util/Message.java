@@ -1,6 +1,10 @@
 package org.by1337.bairdrop.util;
 
 import me.clip.placeholderapi.PlaceholderAPI;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.title.Title;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
@@ -8,13 +12,12 @@ import org.bukkit.boss.BossBar;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
 import org.by1337.bairdrop.BAirDrop;
 import org.jetbrains.annotations.Nullable;
 
@@ -130,7 +133,7 @@ public class Message {
      * @param msg The message
      */
     public static void sendActionBar(Player pl, String msg) {
-        pl.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(messageBuilder(msg)));
+        pl.sendActionBar(messageBuilderComponent(msg));
     }
 
     /**
@@ -138,8 +141,9 @@ public class Message {
      * @param msg The message
      */
     public static void sendAllActionBar(String msg) {
+        Component component = messageBuilderComponent(msg);
         for (Player pl : Bukkit.getOnlinePlayers())
-            pl.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(messageBuilder(msg)));
+            pl.sendActionBar(component);
     }
 
     /**
@@ -150,9 +154,10 @@ public class Message {
     @Deprecated
     public static void sendAllOpActionBar(String msg) {
         Message.logger(msg);
+        Component component = messageBuilderComponent(msg);
         for (Player pl : Bukkit.getOnlinePlayers())
             if (pl.isOp()) {
-                pl.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(messageBuilder(msg)));
+                pl.sendActionBar(component);
             }
     }
 
@@ -166,7 +171,8 @@ public class Message {
      * @param fadeOut The fade-out time for the title
      */
     public static void sendTitle(Player pl, String title, String subTitle, int fadeIn, int stay, int fadeOut) {
-        pl.sendTitle(messageBuilder(title), messageBuilder(subTitle), fadeIn, stay, fadeOut);
+        Title.Times times = Title.Times.times(Duration.ofMillis(fadeIn * 50L), Duration.ofMillis(stay * 50L), Duration.ofMillis(fadeOut * 50L));
+        pl.showTitle(Title.title(messageBuilderComponent(title), messageBuilderComponent(subTitle), times));
     }
 
     /**
@@ -176,7 +182,8 @@ public class Message {
      * @param subTitle The subtitle message
      */
     public static void sendTitle(Player pl, String title, String subTitle) {
-        pl.sendTitle(messageBuilder(title), messageBuilder(subTitle), 10, 20, 10);
+        Title.Times times = Title.Times.times(Duration.ofMillis(500), Duration.ofMillis(1000), Duration.ofMillis(500));
+        pl.showTitle(Title.title(messageBuilderComponent(title), messageBuilderComponent(subTitle), times));
     }
 
     /**
@@ -185,8 +192,10 @@ public class Message {
      * @param subTitle The subtitle message
      */
     public static void sendAllTitle(String title, String subTitle) {
+        Title.Times times = Title.Times.times(Duration.ofMillis(1000), Duration.ofMillis(1500), Duration.ofMillis(1000));
+        Title t = Title.title(messageBuilderComponent(title), messageBuilderComponent(subTitle), times);
         for (Player pl : Bukkit.getOnlinePlayers())
-            pl.sendTitle(messageBuilder(title), messageBuilder(subTitle), 20, 30, 20);
+            pl.showTitle(t);
     }
 
     /**
@@ -200,7 +209,59 @@ public class Message {
         String str = msg.replace("{PP}", prefixPlugin).replace("AU", AUTHOR);
         str = setPlaceholders(null, str);
 
+        if (str.contains("<") && str.contains(">")) {
+            try {
+                String miniMessageStr = convertLegacyToMiniMessage(str);
+                Component component = MiniMessage.miniMessage().deserialize(miniMessageStr);
+                return LegacyComponentSerializer.legacySection().serialize(component);
+            } catch (Exception ignored) {
+            }
+        }
         return hex(str);
+    }
+
+    public static Component messageBuilderComponent(String msg) {
+        if (msg == null) return Component.empty();
+        String processed = msg.replace("{PP}", prefixPlugin).replace("AU", AUTHOR);
+        processed = setPlaceholders(null, processed);
+        
+        if (processed.contains("<") && processed.contains(">")) {
+            try {
+                String miniMessageStr = convertLegacyToMiniMessage(processed);
+                return MiniMessage.miniMessage().deserialize(miniMessageStr);
+            } catch (Exception ignored) {
+            }
+        }
+        return LegacyComponentSerializer.legacySection().deserialize(hex(processed));
+    }
+
+    private static String convertLegacyToMiniMessage(String str) {
+        String resetDeco = "<!bold><!italic><!underlined><!strikethrough><!obfuscated>";
+        str = str.replace("&k", "<obfuscated>").replace("§k", "<obfuscated>");
+        str = str.replace("&l", "<bold>").replace("§l", "<bold>");
+        str = str.replace("&m", "<strikethrough>").replace("§m", "<strikethrough>");
+        str = str.replace("&n", "<underlined>").replace("§n", "<underlined>");
+        str = str.replace("&o", "<italic>").replace("§o", "<italic>");
+        str = str.replace("&r", "<reset>").replace("§r", "<reset>");
+        str = str.replace("&0", "<black>" + resetDeco).replace("§0", "<black>" + resetDeco);
+        str = str.replace("&1", "<dark_blue>" + resetDeco).replace("§1", "<dark_blue>" + resetDeco);
+        str = str.replace("&2", "<dark_green>" + resetDeco).replace("§2", "<dark_green>" + resetDeco);
+        str = str.replace("&3", "<dark_aqua>" + resetDeco).replace("§3", "<dark_aqua>" + resetDeco);
+        str = str.replace("&4", "<dark_red>" + resetDeco).replace("§4", "<dark_red>" + resetDeco);
+        str = str.replace("&5", "<dark_purple>" + resetDeco).replace("§5", "<dark_purple>" + resetDeco);
+        str = str.replace("&6", "<gold>" + resetDeco).replace("§6", "<gold>" + resetDeco);
+        str = str.replace("&7", "<gray>" + resetDeco).replace("§7", "<gray>" + resetDeco);
+        str = str.replace("&8", "<dark_gray>" + resetDeco).replace("§8", "<dark_gray>" + resetDeco);
+        str = str.replace("&9", "<blue>" + resetDeco).replace("§9", "<blue>" + resetDeco);
+        str = str.replace("&a", "<green>" + resetDeco).replace("§a", "<green>" + resetDeco);
+        str = str.replace("&b", "<aqua>" + resetDeco).replace("§b", "<aqua>" + resetDeco);
+        str = str.replace("&c", "<red>" + resetDeco).replace("§c", "<red>" + resetDeco);
+        str = str.replace("&d", "<light_purple>" + resetDeco).replace("§d", "<light_purple>" + resetDeco);
+        str = str.replace("&e", "<yellow>" + resetDeco).replace("§e", "<yellow>" + resetDeco);
+        str = str.replace("&f", "<white>" + resetDeco).replace("§f", "<white>" + resetDeco);
+        Matcher hexMatcher = RAW_HEX_REGEX.matcher(str);
+        str = hexMatcher.replaceAll("<$1>" + resetDeco);
+        return str;
     }
 
     /**

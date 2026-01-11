@@ -35,7 +35,7 @@ public class ShowAllListeners implements Listener {
     public ShowAllListeners(AirDrop airDrop) {
         this.airDrop = airDrop;
         page = 0;
-        inventory = Bukkit.createInventory(null, 54, Message.messageBuilder(BAirDrop.getConfigMessage().getMessage("show-all-listeners-inv")));
+        inventory = Bukkit.createInventory(null, 54, Message.messageBuilderComponent(BAirDrop.getConfigMessage().getMessage("show-all-listeners-inv")));
         generate();
     }
 
@@ -106,40 +106,6 @@ public class ShowAllListeners implements Listener {
                 break;
             }
         }
-
-        List<String> formattedLore = new ArrayList<>();
-        for (String s : lore) {
-            if (s.length() > 50) {
-                String lastColor = "&7";
-                for (int i = 0; i < s.length() - 1; i++) {
-                    if (s.charAt(i) == '&' && "0123456789abcdefklmnor".indexOf(s.charAt(i + 1)) != -1) {
-                        lastColor = s.substring(i, i + 2);
-                    }
-                }
-                StringBuilder sb = new StringBuilder();
-                String[] args = s.split(" ");
-                int len = 0;
-                for(String word : args){
-                    len += word.length() + 1;
-                    if(len >= 50 ){
-                        sb.append(word);
-                        formattedLore.add(sb.toString());
-                        sb = new StringBuilder();
-                        sb.append(lastColor);
-                        len = 0;
-                    }else {
-                        sb.append(word).append(" ");
-                    }
-                }
-                if(!sb.toString().equals(lastColor)){
-                    formattedLore.add(sb.toString());
-                }
-            } else {
-                formattedLore.add(s);
-            }
-        }
-        lore = formattedLore;
-
 
         List<String> nweLore = new ArrayList<>();
         lore.replaceAll(s -> s.replace("\\n", "%split%"));

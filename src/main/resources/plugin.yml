@@ -1,7 +1,7 @@
 name: BAirDropS
 version: '${project.version}'
 main: org.by1337.bairdrop.BAirDrop
-api-version: '1.21'
+api-version: '1.21.4'
 authors: [ By1337 ]
 depend: [WorldGuard, WorldEdit]
 softdepend:
@@ -29,7 +29,6 @@ permissions:
       bair.start: true
       bair.stop: true
       bair.listeners: true
-      bair.generate: true
       bair.get: true
       bair.delete: true
       bair.clone: true
@@ -64,9 +63,6 @@ permissions:
     default: op
   bair.listeners:
     description: /bair listeners <id>
-    default: op
-  bair.generate:
-    description: /bair generate <id> <timings> <count>
     default: op
   bair.get:
     description: /bair get <item>

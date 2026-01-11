@@ -40,7 +40,7 @@ public class SelectInv implements Listener {
         selectInv = this;
         this.airDrop = airDrop;
         this.menu = menu;
-        inv = Bukkit.createInventory(null, 54, Message.messageBuilder(BAirDrop.getConfigMessage().getMessage("inv-select")));
+        inv = Bukkit.createInventory(null, 54, Message.messageBuilderComponent(BAirDrop.getConfigMessage().getMessage("inv-select")));
         generate();
     }
 

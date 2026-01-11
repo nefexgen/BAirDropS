@@ -34,7 +34,7 @@ public class AddingItems implements Listener {
         addingItems = this;
         if (airdrop != null) {
             this.airdrop = airdrop;
-            inv = Bukkit.createInventory(null, airdrop.getInventorySize(), Message.messageBuilder(BAirDrop.getConfigMessage().getMessage("inv-edit").replace("{id}", airdrop.getId())));
+            inv = Bukkit.createInventory(null, airdrop.getInventorySize(), Message.messageBuilderComponent(BAirDrop.getConfigMessage().getMessage("inv-edit").replace("{id}", airdrop.getId())));
             this.invName = invName;
             inv = airdrop.getEditorItemsInventory(inv, invName);
         }

@@ -105,9 +105,9 @@ public class ListenChat implements Listener {
                         e.setCancelled(true);
                         return;
                     }
-                    int x = Integer.parseInt(e.getMessage());
+                    double x = Double.parseDouble(e.getMessage());
                     airDrop.setTimeToStartCons(x);
-                    airDrop.setTimeToStart(x * 60);
+                    airDrop.setTimeToStart((int) (x * 60));
                     airDrop.save();
                     Message.sendMsg(pl, String.format(BAirDrop.getConfigMessage().getMessage("time-to-start-changed"), e.getMessage()));
                 }
@@ -117,9 +117,9 @@ public class ListenChat implements Listener {
                         e.setCancelled(true);
                         return;
                     }
-                    int x = Integer.parseInt(e.getMessage());
+                    double x = Double.parseDouble(e.getMessage());
                     airDrop.setSearchBeforeStartCons(x);
-                    airDrop.setSearchBeforeStart(x * 60);
+                    airDrop.setSearchBeforeStart((int) (x * 60));
                     airDrop.save();
                     Message.sendMsg(pl, String.format(BAirDrop.getConfigMessage().getMessage("search-before-start-changed"), e.getMessage()));
                 }
@@ -129,9 +129,9 @@ public class ListenChat implements Listener {
                         e.setCancelled(true);
                         return;
                     }
-                    int x = Integer.parseInt(e.getMessage());
+                    double x = Double.parseDouble(e.getMessage());
                     airDrop.setTimeToUnlockCons(x);
-                    airDrop.setTimeToOpen(x * 60);
+                    airDrop.setTimeToOpen((int) (x * 60));
                     airDrop.save();
                     Message.sendMsg(pl, String.format(BAirDrop.getConfigMessage().getMessage("time-to-open-changed"), e.getMessage()));
                 }
@@ -141,9 +141,9 @@ public class ListenChat implements Listener {
                         e.setCancelled(true);
                         return;
                     }
-                    int x = Integer.parseInt(e.getMessage());
+                    double x = Double.parseDouble(e.getMessage());
                     airDrop.setTimeToStopCons(x);
-                    airDrop.setTimeStop(x * 60);
+                    airDrop.setTimeStop((int) (x * 60));
                     airDrop.save();
                     Message.sendMsg(pl, String.format(BAirDrop.getConfigMessage().getMessage("time-to-stop-changed"), e.getMessage()));
                 }

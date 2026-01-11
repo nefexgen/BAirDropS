@@ -25,7 +25,6 @@ import java.util.Map;
 public class FireworkEffect implements IEffect, EffectSerializable{
     private int ticks = -1;
     private final int timeUpdate;
-    private AirDrop airDrop;
     private boolean used;
     private boolean stop;
     private double startHeight;
@@ -75,7 +74,6 @@ public class FireworkEffect implements IEffect, EffectSerializable{
 
     @Override
     public void Start(AirDrop airDrop) {
-        this.airDrop = airDrop;
         if (airDrop.getAnyLoc() == null) {
             Message.error(BAirDrop.getConfigMessage().getMessage("effect-error-loc-is-null"));
             Message.error(BAirDrop.getConfigMessage().getMessage("effect-error-loc-is-null2"));

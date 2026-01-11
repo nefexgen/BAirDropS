@@ -16,7 +16,6 @@ import java.util.Map;
 public class Circle implements IEffect, EffectSerializable {
     private int ticks = -1;
     private final int timeUpdate;
-    private AirDrop airDrop;
     private boolean used;
     private boolean stop = false;
     private final Particle particle;
@@ -84,7 +83,6 @@ public class Circle implements IEffect, EffectSerializable {
 
     @Override
     public void Start(AirDrop airDrop) {
-        this.airDrop = airDrop;
         if (airDrop.getAnyLoc() == null) {
             Message.error(BAirDrop.getConfigMessage().getMessage("effect-error-loc-is-null"));
             Message.error(BAirDrop.getConfigMessage().getMessage("effect-error-loc-is-null2"));
@@ -109,7 +107,6 @@ public class Circle implements IEffect, EffectSerializable {
         new BukkitRunnable() {
             @Override
             public void run() {
-                //    Message.logger("spawn = " + loc);
                 for (double y = 0; y <= numberOfSteps; y += step) {
                     double x = radius * Math.cos(y);
                     double z = radius * Math.sin(y);

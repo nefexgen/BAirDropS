@@ -48,7 +48,7 @@ public class AntiSteal implements Listener {
             
             ChestStealData chestStealData = chestStealDataMap.getOrDefault(player.getUniqueId(), new ChestStealData());
             long currentTime = System.currentTimeMillis();
-            int cooldownMs = BAirDrop.getInstance().getConfig().getInt("anti-steal.сooldown");
+            int cooldownMs = BAirDrop.getInstance().getConfig().getInt("anti-steal.cooldown");
             int cooldownTicks = Math.abs(cooldownMs / 50);
 
             if (chestStealData.getLastSteal() != -1 && currentTime - chestStealData.getLastSteal() <= cooldownMs) {

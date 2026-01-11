@@ -2,7 +2,7 @@ package org.by1337.bairdrop.effect.effectImpl;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Zombie;
@@ -25,7 +25,6 @@ import java.util.concurrent.ThreadLocalRandom;
 public class Guard implements IEffect {
     private int ticks = -1;
     private final int timeUpdate;
-    private AirDrop airDrop;
     private boolean used;
     private boolean stop;
     private final double radius;
@@ -48,7 +47,6 @@ public class Guard implements IEffect {
 
     @Override
     public void Start(AirDrop airDrop) {
-        this.airDrop = airDrop;
         if (airDrop.getAnyLoc() == null) {
             Message.error(BAirDrop.getConfigMessage().getMessage("effect-error-loc-is-null"));
             Message.error(BAirDrop.getConfigMessage().getMessage("effect-error-loc-is-null2"));
@@ -83,9 +81,9 @@ public class Guard implements IEffect {
 
                     Zombie zombie = loc.getWorld().spawn(new Location(loc.getWorld(), loc.getX() + x + 0.5, y + 1, loc.getZ() + z + 0.5), Zombie.class);
 
-                    zombie.setCustomName(Message.messageBuilder(entityName));
+                    zombie.customName(Message.messageBuilderComponent(entityName));
                     zombie.setSeed(2);
-                    zombie.setMaxHealth(heal);
+                    zombie.getAttribute(Attribute.MAX_HEALTH).setBaseValue(heal);
                     zombie.setHealth(heal);
 
                     ItemStack boot = new ItemStack(Material.DIAMOND_BOOTS);

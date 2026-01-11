@@ -42,7 +42,10 @@ public class DecoyManager implements Listener {
     }
 
     private void loadConfig() {
-        List<String> items = BAirDrop.getInstance().getConfig().getStringList("decoy-protection.fake-items");
+        List<String> items = airDrop.getDecoyFakeItems();
+        if (items.isEmpty()) {
+            items = BAirDrop.getInstance().getConfig().getStringList("decoy-protection.fake-items");
+        }
         for (String item : items) {
             try {
                 Material mat = Material.valueOf(item.toUpperCase());
@@ -59,7 +62,11 @@ public class DecoyManager implements Listener {
             fakeItems.add(Material.GRAY_DYE);
         }
 
-        fakeNames.addAll(BAirDrop.getInstance().getConfig().getStringList("decoy-protection.fake-names"));
+        List<String> names = airDrop.getDecoyFakeNames();
+        if (names.isEmpty()) {
+            names = BAirDrop.getInstance().getConfig().getStringList("decoy-protection.fake-names");
+        }
+        fakeNames.addAll(names);
         if (fakeNames.isEmpty()) {
             fakeNames.add("&eКость пирата");
             fakeNames.add("&6Рога мамонта");
@@ -71,7 +78,7 @@ public class DecoyManager implements Listener {
     public Inventory createDecoyInventory(Player player) {
         Inventory realInventory = airDrop.getInventory();
         Inventory decoyInventory = Bukkit.createInventory(null, realInventory.getSize(), 
-                Message.messageBuilder(airDrop.getInventoryTitle()));
+                Message.messageBuilderComponent(airDrop.getInventoryTitle()));
 
         Map<Integer, ItemStack> realItemsMap = new HashMap<>();
 
@@ -119,7 +126,7 @@ public class DecoyManager implements Listener {
         if (antiStealEnabled) {
             ChestStealData chestStealData = getChestStealDataMap().getOrDefault(player.getUniqueId(), new ChestStealData());
             long currentTime = System.currentTimeMillis();
-            int cooldownMs = BAirDrop.getInstance().getConfig().getInt("anti-steal.сooldown");
+            int cooldownMs = BAirDrop.getInstance().getConfig().getInt("anti-steal.cooldown");
             int cooldownTicks = Math.abs(cooldownMs / 50);
 
             if (chestStealData.getLastSteal() != -1 && currentTime - chestStealData.getLastSteal() <= cooldownMs) {
@@ -192,12 +199,27 @@ public class DecoyManager implements Listener {
         return playerDecoyInventories.containsKey(player.getUniqueId());
     }
 
-    public void unregister() {
-        HandlerList.unregisterAll(this);
+    public void closeAllInventories() {
+        for (UUID uuid : new ArrayList<>(playerDecoyInventories.keySet())) {
+            Player player = Bukkit.getPlayer(uuid);
+            if (player != null && player.isOnline()) {
+                player.closeInventory();
+            }
+        }
         playerDecoyInventories.clear();
         playerRealItems.clear();
     }
 
+    public void unregister() {
+        HandlerList.unregisterAll(this);
+        closeAllInventories();
+    }
+
+    public static boolean isEnabled(AirDrop airDrop) {
+        return airDrop.isDecoyProtectionEnabled();
+    }
+
+    @Deprecated
     public static boolean isEnabled() {
         return BAirDrop.getInstance().getConfig().getBoolean("decoy-protection.enable", false);
     }

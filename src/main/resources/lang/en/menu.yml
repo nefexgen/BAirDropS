@@ -101,25 +101,20 @@ main:
     commands:
       LEFT-CLICK:
         - '[change-world]'
-  usePreGeneratedLocations:
+  decoyProtection:
     slot: 32
-    name: '&aPre-generated Locations'
-    material: GRASS_BLOCK
+    name: '&cDecoy Protection'
+    material: PHANTOM_MEMBRANE
     lore:
       - ''
-      - '&8▸ &7Use: &f{use-pre-generated-locations}'
-      - '&8▸ &7{world}: &f{world-loc} locations'
+      - '&8▸ &7Status: &f{decoy-protection}'
+      - '&8▸ &7Shows fake items instead'
+      - '&8  &7of real ones in airdrop'
       - ''
       - '&a▶ LMB &8- &7Toggle'
-      - '&e▶ SHIFT+LMB &8- &7Generate 50'
-      - '&c▶ SHIFT+RMB &8- &7Stop'
     commands:
       LEFT-CLICK:
-        - '[!usePreGeneratedLocations]'
-      SHIFT_RIGHT-CLICK:
-        - '[PLAYER] bair generate {id} stop'
-      SHIFT_LEFT-CLICK:
-        - '[PLAYER] bair generate {id} 1 50'
+        - '[!decoyProtection]'
   flatnessCheck:
     slot: 29
     name: '&6Flatness Check'

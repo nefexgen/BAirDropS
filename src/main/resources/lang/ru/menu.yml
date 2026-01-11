@@ -101,25 +101,20 @@ main:
     commands:
       LEFT-CLICK:
         - '[change-world]'
-  usePreGeneratedLocations:
+  decoyProtection:
     slot: 32
-    name: '&aПре-генерация локаций'
-    material: GRASS_BLOCK
+    name: '&cФейковые предметы'
+    material: PHANTOM_MEMBRANE
     lore:
       - ''
-      - '&8▸ &7Использовать: &f{use-pre-generated-locations}'
-      - '&8▸ &7{world}: &f{world-loc} локаций'
+      - '&8▸ &7Статус: &f{decoy-protection}'
+      - '&8▸ &7Показывает фейковые предметы'
+      - '&8  &7вместо реальных в аирдропе'
       - ''
       - '&a▶ ЛКМ &8- &7Переключить'
-      - '&e▶ SHIFT+ЛКМ &8- &7Сгенерировать 50'
-      - '&c▶ SHIFT+ПКМ &8- &7Остановить'
     commands:
       LEFT-CLICK:
-        - '[!usePreGeneratedLocations]'
-      SHIFT_RIGHT-CLICK:
-        - '[PLAYER] bair generate {id} stop'
-      SHIFT_LEFT-CLICK:
-        - '[PLAYER] bair generate {id} 1 50'
+        - '[!decoyProtection]'
   flatnessCheck:
     slot: 29
     name: '&6Проверка ровности'

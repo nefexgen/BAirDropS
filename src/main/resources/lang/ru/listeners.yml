@@ -245,4 +245,4 @@ listeners:
     description: '&6Когда игрок использует чит для кражи   из сундука'
     event: 'PLAYER_STEAL'
     commands:
-      - '[CONSOLE] kick %player_name% cheat'
+      - '[CONSOLE] kick &6%player_name% &7cheat'
