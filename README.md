@@ -1,4 +1,4 @@
-Dependencies: PlaceholderAPI, (DecentHolograms or ProtocolLib), WorldGuard, WorldEdit
+Dependencies: PlaceholderAPI, WorldGuard, WorldEdit
 
 You are also recommended to join the community on the Discord server [here](https://discord.gg/gRF6FVwDJp).
 
