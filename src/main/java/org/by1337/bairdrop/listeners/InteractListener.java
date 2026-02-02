@@ -7,14 +7,15 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.inventory.Inventory;
 
 import org.by1337.bairdrop.AirDrop;
 import org.by1337.bairdrop.api.event.AirDropOpenEvent;
 import org.by1337.bairdrop.customListeners.CustomEvent;
+import org.by1337.bairdrop.hologram.HologramManager;
 import org.by1337.bairdrop.util.AirManager;
 import org.by1337.bairdrop.util.DecoyManager;
-import org.by1337.bairdrop.util.Message;
 
 import java.util.HashMap;
 import java.util.UUID;
@@ -79,5 +80,10 @@ public class InteractListener implements Listener {
         if (airDrop != null && airDrop.isAirDropStarted()) {
             e.setCancelled(true);
         }
+    }
+
+    @EventHandler
+    public void onChunkLoad(ChunkLoadEvent e) {
+        HologramManager.onChunkLoad(e.getChunk());
     }
 }

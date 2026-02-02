@@ -5,13 +5,18 @@ import java.util.regex.Pattern;
 
 public class TimeParser {
     private static final Pattern TIME_PATTERN = Pattern.compile("(?:(\\d+)\\s*h)?\\s*(?:(\\d+)\\s*m)?\\s*(?:(\\d+)\\s*s)?", Pattern.CASE_INSENSITIVE);
+    private static final Pattern PLAIN_NUMBER_PATTERN = Pattern.compile("^\\d+$");
 
     public static int parseToSeconds(String input) {
         if (input == null || input.trim().isEmpty()) {
             return 0;
         }
         
-        input = input.trim();
+        input = input.trim().replace("--force", "").trim();
+        
+        if (PLAIN_NUMBER_PATTERN.matcher(input).matches()) {
+            return Integer.parseInt(input);
+        }
         
         Matcher matcher = TIME_PATTERN.matcher(input);
         if (matcher.matches()) {
@@ -22,6 +27,11 @@ public class TimeParser {
         }
         
         return 0;
+    }
+    
+    public static boolean hasForceFlag(String input) {
+        if (input == null) return false;
+        return input.toLowerCase().contains("--force");
     }
 
     public static String formatSeconds(int totalSeconds) {

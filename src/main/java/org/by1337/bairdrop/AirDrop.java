@@ -517,4 +517,10 @@ public interface AirDrop extends Observable {
     void setTopLooterGlowEnabled(boolean enabled);
     int getTopLooterGlowDuration();
     void setTopLooterGlowDuration(int duration);
+    org.by1337.bairdrop.util.AntiSteal getAntiSteal();
+
+    boolean isScheduledTimeEnabled();
+    void setScheduledTimeEnabled(boolean enabled);
+
+    boolean isAutoActivateEnabled();
 }

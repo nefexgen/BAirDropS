@@ -25,11 +25,8 @@ public class HologramManager {
             return;
         }
 
-        if (!location.getWorld().isChunkLoaded(location.getBlockX() >> 4, location.getBlockZ() >> 4)) {
-            return;
-        }
-
         HologramData data = holograms.get(id);
+        boolean chunkLoaded = location.getWorld().isChunkLoaded(location.getBlockX() >> 4, location.getBlockZ() >> 4);
 
         if (data != null) {
             if (data.type != type) {
@@ -40,6 +37,11 @@ public class HologramManager {
 
             data.location = location.clone();
             data.settings = settings;
+            data.lines = new ArrayList<>(lines);
+
+            if (!chunkLoaded) {
+                return;
+            }
 
             if (type == HologramType.TEXTDISPLAY) {
                 updateTextDisplay(data, lines, location, settings);
@@ -47,8 +49,12 @@ public class HologramManager {
                 updateArmorStands(data, lines, location);
             }
         } else {
-            data = new HologramData(id, type, location.clone(), settings);
+            data = new HologramData(id, type, location.clone(), settings, lines);
             holograms.put(id, data);
+
+            if (!chunkLoaded) {
+                return;
+            }
 
             if (type == HologramType.TEXTDISPLAY) {
                 createTextDisplay(data, lines, location, settings);
@@ -200,18 +206,39 @@ public class HologramManager {
         holograms.clear();
     }
 
+    public static void onChunkLoad(org.bukkit.Chunk chunk) {
+        for (HologramData data : holograms.values()) {
+            if (data.location == null || data.location.getWorld() == null) continue;
+            if (!data.location.getWorld().equals(chunk.getWorld())) continue;
+            int chunkX = data.location.getBlockX() >> 4;
+            int chunkZ = data.location.getBlockZ() >> 4;
+            if (chunkX == chunk.getX() && chunkZ == chunk.getZ()) {
+                if (data.entities.isEmpty() || data.entities.stream().noneMatch(Entity::isValid)) {
+                    data.entities.clear();
+                    if (data.type == HologramType.TEXTDISPLAY) {
+                        createTextDisplay(data, data.lines, data.location, data.settings);
+                    } else {
+                        createArmorStands(data, data.lines, data.location);
+                    }
+                }
+            }
+        }
+    }
+
     private static class HologramData {
         String id;
         HologramType type;
         Location location;
         HologramSettings settings;
+        List<String> lines = new ArrayList<>();
         List<Entity> entities = new ArrayList<>();
 
-        HologramData(String id, HologramType type, Location location, HologramSettings settings) {
+        HologramData(String id, HologramType type, Location location, HologramSettings settings, List<String> lines) {
             this.id = id;
             this.type = type;
             this.location = location;
             this.settings = settings;
+            this.lines = new ArrayList<>(lines);
         }
     }
 }

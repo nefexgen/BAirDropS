@@ -179,6 +179,10 @@ public class DecoyManager implements Listener {
             realInventory.setItem(slot, null);
             decoyInventory.setItem(slot, null);
             realItems.remove(slot);
+            AntiSteal antiSteal = airDrop.getAntiSteal();
+            if (antiSteal != null) {
+                antiSteal.trackLoot(player, realItem.getAmount());
+            }
         } else {
             Message.sendMsg(player, BAirDrop.getConfigMessage().getMessage("inventory-full"));
         }
@@ -199,6 +203,32 @@ public class DecoyManager implements Listener {
         return playerDecoyInventories.containsKey(player.getUniqueId());
     }
 
+    public void refreshDecoyInventories() {
+        Inventory realInventory = airDrop.getInventory();
+        for (Map.Entry<UUID, Inventory> entry : playerDecoyInventories.entrySet()) {
+            UUID uuid = entry.getKey();
+            Inventory decoyInventory = entry.getValue();
+            Map<Integer, ItemStack> realItemsMap = playerRealItems.get(uuid);
+            if (realItemsMap == null) {
+                realItemsMap = new HashMap<>();
+                playerRealItems.put(uuid, realItemsMap);
+            }
+            for (int slot = 0; slot < realInventory.getSize(); slot++) {
+                ItemStack realItem = realInventory.getItem(slot);
+                ItemStack decoyItem = decoyInventory.getItem(slot);
+                boolean hasReal = realItem != null && !realItem.getType().isAir();
+                boolean hasDecoy = decoyItem != null && !decoyItem.getType().isAir();
+                if (hasReal && !hasDecoy) {
+                    realItemsMap.put(slot, realItem.clone());
+                    decoyInventory.setItem(slot, createDecoyItem(slot));
+                } else if (!hasReal && hasDecoy) {
+                    realItemsMap.remove(slot);
+                    decoyInventory.setItem(slot, null);
+                }
+            }
+        }
+    }
+
     public void closeAllInventories() {
         for (UUID uuid : new ArrayList<>(playerDecoyInventories.keySet())) {
             Player player = Bukkit.getPlayer(uuid);
@@ -208,6 +238,17 @@ public class DecoyManager implements Listener {
         }
         playerDecoyInventories.clear();
         playerRealItems.clear();
+    }
+
+    public List<Player> getViewers() {
+        List<Player> viewers = new ArrayList<>();
+        for (UUID uuid : playerDecoyInventories.keySet()) {
+            Player player = Bukkit.getPlayer(uuid);
+            if (player != null && player.isOnline()) {
+                viewers.add(player);
+            }
+        }
+        return viewers;
     }
 
     public void unregister() {

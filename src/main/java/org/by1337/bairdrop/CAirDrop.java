@@ -4,6 +4,7 @@ import java.util.Arrays;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.WorldEdit;
 import org.bukkit.*;
+import org.bukkit.block.Lidded;
 import org.bukkit.block.data.type.RespawnAnchor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -37,6 +38,7 @@ import org.by1337.bairdrop.serializable.StateSerializable;
 import org.by1337.bairdrop.hologram.HologramManager;
 import org.by1337.bairdrop.hologram.HologramSettings;
 import org.by1337.bairdrop.hologram.HologramType;
+import org.by1337.bairdrop.bossbar.AirDropBossBar;
 import org.by1337.bairdrop.util.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -125,6 +127,18 @@ public class CAirDrop implements AirDrop, StateSerializable {
     private boolean decoyProtectionEnabled = false;
     private List<String> decoyFakeItems = new ArrayList<>();
     private List<String> decoyFakeNames = new ArrayList<>();
+    private boolean itemRevealEnabled = false;
+    private int itemRevealMinPerStep = 3;
+    private int itemRevealMaxPerStep = 5;
+    private double itemRevealInterval = 0.5;
+    private boolean itemRevealStepSoundEnabled = false;
+    private String itemRevealStepSound = "block.amethyst_cluster.fall";
+    private float itemRevealSoundVolume = 0.8f;
+    private float itemRevealSoundPitchMin = 0.9f;
+    private float itemRevealSoundPitchMax = 1.1f;
+    private int itemRevealSoundRadius = 16;
+    private List<ItemStack> pendingRevealItems = new ArrayList<>();
+    private BukkitRunnable itemRevealTask = null;
     private HologramType hologramType;
     private HologramSettings hologramSettings;
     private boolean topLooterGlowEnabled = false;
@@ -132,6 +146,7 @@ public class CAirDrop implements AirDrop, StateSerializable {
     private boolean scheduledTimeEnabled = false;
     private List<String> scheduledTimes = new ArrayList<>();
     private String lastScheduledTrigger = "";
+    private org.by1337.bairdrop.bossbar.AirDropBossBar airDropBossBar;
 
     CAirDrop(FileConfiguration fileConfiguration, File airDropFile) {
         CAirDropInstance = this;
@@ -219,6 +234,30 @@ public class CAirDrop implements AirDrop, StateSerializable {
             decoyProtectionEnabled = fileConfiguration.getBoolean("decoy-protection.enable", false);
             decoyFakeItems = fileConfiguration.getStringList("decoy-protection.fake-items");
             decoyFakeNames = fileConfiguration.getStringList("decoy-protection.fake-names");
+            itemRevealEnabled = fileConfiguration.getBoolean("item-reveal.enabled", false);
+            String itemsPerStep = fileConfiguration.getString("item-reveal.items-per-step", "3-5");
+            if (itemsPerStep.contains("-")) {
+                String[] parts = itemsPerStep.split("-");
+                itemRevealMinPerStep = Integer.parseInt(parts[0].trim());
+                itemRevealMaxPerStep = Integer.parseInt(parts[1].trim());
+            } else {
+                itemRevealMinPerStep = Integer.parseInt(itemsPerStep.trim());
+                itemRevealMaxPerStep = itemRevealMinPerStep;
+            }
+            itemRevealInterval = fileConfiguration.getDouble("item-reveal.interval", 0.5);
+            itemRevealStepSoundEnabled = fileConfiguration.getBoolean("item-reveal.step-sound.enabled", false);
+            itemRevealStepSound = fileConfiguration.getString("item-reveal.step-sound.sound", "block.amethyst_cluster.fall");
+            itemRevealSoundVolume = (float) fileConfiguration.getDouble("item-reveal.step-sound.volume", 0.8);
+            String pitchStr = fileConfiguration.getString("item-reveal.step-sound.pitch", "0.9-1.1");
+            if (pitchStr.contains("-")) {
+                String[] pitchParts = pitchStr.split("-");
+                itemRevealSoundPitchMin = Float.parseFloat(pitchParts[0].trim());
+                itemRevealSoundPitchMax = Float.parseFloat(pitchParts[1].trim());
+            } else {
+                itemRevealSoundPitchMin = Float.parseFloat(pitchStr.trim());
+                itemRevealSoundPitchMax = itemRevealSoundPitchMin;
+            }
+            itemRevealSoundRadius = fileConfiguration.getInt("item-reveal.step-sound.radius", 16);
             holoOffsets = new Vector(
                     fileConfiguration.getDouble("holo-offsets.x"),
                     fileConfiguration.getDouble("holo-offsets.y"),
@@ -237,6 +276,25 @@ public class CAirDrop implements AirDrop, StateSerializable {
 
             scheduledTimeEnabled = fileConfiguration.getBoolean("scheduled-time.enabled", false);
             scheduledTimes = fileConfiguration.getStringList("scheduled-time.times");
+
+            airDropBossBar = new org.by1337.bairdrop.bossbar.AirDropBossBar(this);
+            airDropBossBar.setEnabled(fileConfiguration.getBoolean("bossbar.enabled", false));
+            airDropBossBar.setVisibility(fileConfiguration.getString("bossbar.visibility", "global"));
+            airDropBossBar.setRadius(fileConfiguration.getInt("bossbar.radius", 30));
+            try {
+                airDropBossBar.setColor(org.bukkit.boss.BarColor.valueOf(fileConfiguration.getString("bossbar.color", "RED")));
+            } catch (IllegalArgumentException e) {
+                airDropBossBar.setColor(org.bukkit.boss.BarColor.RED);
+            }
+            try {
+                airDropBossBar.setStyle(org.bukkit.boss.BarStyle.valueOf(fileConfiguration.getString("bossbar.style", "SOLID")));
+            } catch (IllegalArgumentException e) {
+                airDropBossBar.setStyle(org.bukkit.boss.BarStyle.SOLID);
+            }
+            airDropBossBar.setTitleClosed(fileConfiguration.getString("bossbar.title-closed", "{air-name} &7откроется через &c{time-to-open} сек"));
+            airDropBossBar.setTitleOpen(fileConfiguration.getString("bossbar.title-open", "{air-name} &7открыт. До удаления &c{time-stop} сек"));
+            airDropBossBar.setTitleActivate(fileConfiguration.getString("bossbar.title-activate", "{air-name} &7активируется через &c{auto-activate-timer} сек"));
+            airDropBossBar.setTitleNotActivated(fileConfiguration.getString("bossbar.title-not-activated", "{air-name} &7не активирован"));
 
             generator = new CGenerator();
             if (fileConfiguration.getConfigurationSection("inv") != null) {
@@ -337,6 +395,13 @@ public class CAirDrop implements AirDrop, StateSerializable {
             scheduledTimeEnabled = false;
             scheduledTimes = new ArrayList<>(Arrays.asList("12:00", "18:00"));
             
+            itemRevealEnabled = false;
+            itemRevealMinPerStep = 3;
+            itemRevealMaxPerStep = 5;
+            itemRevealInterval = 0.5;
+            
+            airDropBossBar = new AirDropBossBar(this);
+            
             signedListener = new ArrayList<>();
             generator = new CGenerator();
             inventory = Bukkit.createInventory(null, inventorySize, Message.messageBuilderComponent(inventoryTitle));
@@ -429,6 +494,9 @@ public class CAirDrop implements AirDrop, StateSerializable {
                         updateEditAirMenu("stats");
                     }
                     notifyObservers(CustomEvent.TIMER, null);
+                    if (airDropBossBar != null && airDropBossBar.isEnabled()) {
+                        airDropBossBar.update();
+                    }
                     if (isStopWhenEmpty() && isAirDropStarted()) {
                         boolean stop = false;
                         for (ItemStack itemStack : inventory) {
@@ -541,7 +609,7 @@ public class CAirDrop implements AirDrop, StateSerializable {
             hologramSettings.getBackgroundColor().getRed(),
             hologramSettings.getBackgroundColor().getGreen(),
             hologramSettings.getBackgroundColor().getBlue()));
-        fileConfiguration.set("holo-settings.background-opacity", (hologramSettings.getBackgroundColor().getAlpha() * 100 / 255));
+        fileConfiguration.set("holo-settings.background-opacity", hologramSettings.getBackgroundOpacity());
         fileConfiguration.set("holo-settings.see-through", hologramSettings.isSeeThrough());
         fileConfiguration.set("holo-settings.view-range", hologramSettings.getViewRange());
         fileConfiguration.set("holo-settings.brightness", hologramSettings.getBrightness());
@@ -560,11 +628,33 @@ public class CAirDrop implements AirDrop, StateSerializable {
         fileConfiguration.set("decoy-protection.fake-items", decoyFakeItems);
         fileConfiguration.set("decoy-protection.fake-names", decoyFakeNames);
         
+        fileConfiguration.set("item-reveal.enabled", itemRevealEnabled);
+        fileConfiguration.set("item-reveal.items-per-step", itemRevealMinPerStep + "-" + itemRevealMaxPerStep);
+        fileConfiguration.set("item-reveal.interval", itemRevealInterval);
+        fileConfiguration.set("item-reveal.step-sound.enabled", itemRevealStepSoundEnabled);
+        fileConfiguration.set("item-reveal.step-sound.sound", itemRevealStepSound);
+        fileConfiguration.set("item-reveal.step-sound.volume", itemRevealSoundVolume);
+        String pitchValue = itemRevealSoundPitchMin == itemRevealSoundPitchMax 
+            ? String.valueOf(itemRevealSoundPitchMin) 
+            : itemRevealSoundPitchMin + "-" + itemRevealSoundPitchMax;
+        fileConfiguration.set("item-reveal.step-sound.pitch", pitchValue);
+        fileConfiguration.set("item-reveal.step-sound.radius", itemRevealSoundRadius);
+        
         fileConfiguration.set("top-looter-glow.enabled", topLooterGlowEnabled);
         fileConfiguration.set("top-looter-glow.duration", topLooterGlowDuration);
         
         fileConfiguration.set("scheduled-time.enabled", scheduledTimeEnabled);
         fileConfiguration.set("scheduled-time.times", scheduledTimes);
+
+        fileConfiguration.set("bossbar.enabled", airDropBossBar.isEnabled());
+        fileConfiguration.set("bossbar.visibility", airDropBossBar.getVisibility());
+        fileConfiguration.set("bossbar.radius", airDropBossBar.getRadius());
+        fileConfiguration.set("bossbar.color", airDropBossBar.getColor().name());
+        fileConfiguration.set("bossbar.style", airDropBossBar.getStyle().name());
+        fileConfiguration.set("bossbar.title-closed", airDropBossBar.getTitleClosed());
+        fileConfiguration.set("bossbar.title-open", airDropBossBar.getTitleOpen());
+        fileConfiguration.set("bossbar.title-activate", airDropBossBar.getTitleActivate());
+        fileConfiguration.set("bossbar.title-not-activated", airDropBossBar.getTitleNotActivated());
         
         fileConfiguration.set("signed-events", signedListener);
 
@@ -680,6 +770,10 @@ public class CAirDrop implements AirDrop, StateSerializable {
         if (antiSteal != null) antiSteal.unregister();
         antiSteal = new AntiSteal(this);
 
+        if (airDropBossBar != null && airDropBossBar.isEnabled()) {
+            airDropBossBar.create();
+        }
+
         notifyObservers(CustomEvent.START_EVENT, null);
     }
 
@@ -712,12 +806,31 @@ public class CAirDrop implements AirDrop, StateSerializable {
 
         airDropLocked = false;
         timeToOpen = 0;
+        
+        if (itemRevealEnabled) {
+            pendingRevealItems.clear();
+            for (int i = 0; i < inventory.getSize(); i++) {
+                ItemStack item = inventory.getItem(i);
+                if (item != null && !item.getType().isAir()) {
+                    pendingRevealItems.add(item.clone());
+                    inventory.setItem(i, null);
+                }
+            }
+            java.util.Collections.shuffle(pendingRevealItems);
+            startItemRevealTask();
+        }
+        
         try {
             airDropLocation.getBlock().setType(materialUnlocked);
             if (materialUnlocked == Material.RESPAWN_ANCHOR) {
                 RespawnAnchor ra = (RespawnAnchor) airDropLocation.getBlock().getBlockData();
                 ra.setCharges(4);
                 airDropLocation.getBlock().setBlockData(ra);
+            }
+            if (materialUnlocked == Material.CHEST || materialUnlocked == Material.ENDER_CHEST) {
+                if (airDropLocation.getBlock().getState() instanceof Lidded lidded) {
+                    lidded.open();
+                }
             }
 
         } catch (IllegalArgumentException e) {
@@ -732,6 +845,72 @@ public class CAirDrop implements AirDrop, StateSerializable {
             HologramManager.createOrUpdateHologram(lines, airDropLocation.clone().add(holoOffsets), id, hologramType, hologramSettings);
         }
         notifyObservers(CustomEvent.UNLOCK_EVENT, null);
+    }
+
+    private void startItemRevealTask() {
+        if (itemRevealTask != null) {
+            itemRevealTask.cancel();
+        }
+        long intervalTicks = Math.max(1, (long) (itemRevealInterval * 20));
+        itemRevealTask = new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (pendingRevealItems.isEmpty() || !airDropStarted) {
+                    cancel();
+                    itemRevealTask = null;
+                    return;
+                }
+                int itemsToReveal = itemRevealMinPerStep + new java.util.Random().nextInt(Math.max(1, itemRevealMaxPerStep - itemRevealMinPerStep + 1));
+                List<Integer> emptySlots = new ArrayList<>();
+                for (int slot = 0; slot < inventory.getSize(); slot++) {
+                    ItemStack slotItem = inventory.getItem(slot);
+                    if (slotItem == null || slotItem.getType().isAir()) {
+                        emptySlots.add(slot);
+                    }
+                }
+                java.util.Collections.shuffle(emptySlots);
+                int itemsRevealed = 0;
+                for (int i = 0; i < itemsToReveal && !pendingRevealItems.isEmpty() && !emptySlots.isEmpty(); i++) {
+                    ItemStack item = pendingRevealItems.remove(0);
+                    int randomSlot = emptySlots.remove(0);
+                    inventory.setItem(randomSlot, item);
+                    itemsRevealed++;
+                }
+                if (itemsRevealed > 0 && itemRevealStepSoundEnabled && itemRevealStepSound != null && !itemRevealStepSound.isEmpty() && airDropLocation != null) {
+                    float pitch = itemRevealSoundPitchMin == itemRevealSoundPitchMax 
+                        ? itemRevealSoundPitchMin 
+                        : itemRevealSoundPitchMin + new java.util.Random().nextFloat() * (itemRevealSoundPitchMax - itemRevealSoundPitchMin);
+                    if (itemRevealSoundRadius == 0) {
+                        Set<Player> viewers = new java.util.HashSet<>();
+                        for (org.bukkit.entity.HumanEntity viewer : inventory.getViewers()) {
+                            if (viewer instanceof Player p) {
+                                viewers.add(p);
+                            }
+                        }
+                        if (decoyManager != null) {
+                            viewers.addAll(decoyManager.getViewers());
+                        }
+                        for (Player p : viewers) {
+                            p.playSound(airDropLocation, itemRevealStepSound, itemRevealSoundVolume, pitch);
+                        }
+                    } else {
+                        int radius = Math.max(1, itemRevealSoundRadius);
+                        for (org.bukkit.entity.Entity entity : airDropLocation.getWorld().getNearbyEntities(
+                                airDropLocation, radius, radius, radius)) {
+                            if (entity instanceof Player p) {
+                                if (p.getLocation().distance(airDropLocation) <= radius) {
+                                    p.playSound(airDropLocation, itemRevealStepSound, itemRevealSoundVolume, pitch);
+                                }
+                            }
+                        }
+                    }
+                }
+                if (decoyManager != null) {
+                    decoyManager.refreshDecoyInventories();
+                }
+            }
+        };
+        itemRevealTask.runTaskTimer(BAirDrop.getInstance(), intervalTicks, intervalTicks);
     }
 
     @Override
@@ -753,6 +932,11 @@ public class CAirDrop implements AirDrop, StateSerializable {
             }
         }
         inventory.clear();
+        if (itemRevealTask != null) {
+            itemRevealTask.cancel();
+            itemRevealTask = null;
+        }
+        pendingRevealItems.clear();
         wasOpened = false;
         airDropStarted = false;
         activated = false;
@@ -773,6 +957,9 @@ public class CAirDrop implements AirDrop, StateSerializable {
         if (decoyManager != null) {
             decoyManager.unregister();
             decoyManager = null;
+        }
+        if (airDropBossBar != null) {
+            airDropBossBar.remove();
         }
     }
 
@@ -876,6 +1063,16 @@ public class CAirDrop implements AirDrop, StateSerializable {
             }
             if (sb.indexOf("{time-to-open}") != -1){
                 sb.replace(sb.indexOf("{time-to-open}"), sb.indexOf("{time-to-open}") + 14, String.valueOf(timeToOpen));
+                b = true;
+                continue;
+            }
+            if (sb.indexOf("{time-stop}") != -1){
+                sb.replace(sb.indexOf("{time-stop}"), sb.indexOf("{time-stop}") + 11, String.valueOf(timeStop));
+                b = true;
+                continue;
+            }
+            if (sb.indexOf("{auto-activate-timer}") != -1){
+                sb.replace(sb.indexOf("{auto-activate-timer}"), sb.indexOf("{auto-activate-timer}") + 21, String.valueOf(autoActivateTimer));
                 b = true;
                 continue;
             }
@@ -2147,6 +2344,11 @@ public class CAirDrop implements AirDrop, StateSerializable {
     }
 
     @Override
+    public AntiSteal getAntiSteal() {
+        return antiSteal;
+    }
+
+    @Override
     public HologramType getHologramType() {
         return hologramType;
     }
@@ -2181,12 +2383,19 @@ public class CAirDrop implements AirDrop, StateSerializable {
         this.topLooterGlowDuration = duration;
     }
 
+    @Override
     public boolean isScheduledTimeEnabled() {
         return scheduledTimeEnabled;
     }
 
+    @Override
     public void setScheduledTimeEnabled(boolean enabled) {
         this.scheduledTimeEnabled = enabled;
+    }
+
+    @Override
+    public boolean isAutoActivateEnabled() {
+        return autoActivateEnabled;
     }
 
     public List<String> getScheduledTimes() {

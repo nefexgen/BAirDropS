@@ -143,7 +143,7 @@ listeners:
     description: '&6Sends a message to everyone about airdrop spawn'
     event: 'START_EVENT'
     commands:
-      - '[MESSAGE_ALL] {air-name}&7 has appeared! Coordinates: &6{x}&7, &6{y}&7, &6{z}'
+      - '[MESSAGE_ALL] {air-name}&7 has appeared! Coordinates: &6{x} {y} {z}'
       - '[TITLE_ALL] {air-name}&7 has appeared!'
       - '[SOUND_ALL] BLOCK_BEACON_POWER_SELECT'
 

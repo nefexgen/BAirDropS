@@ -15,7 +15,7 @@ state-serializable: true
 
 anti-steal:
   enable: true
-  show-message: true
+  show-message: false
   show-cooldown-on-click: true
   max-interval: 5
   max-warnings: 5

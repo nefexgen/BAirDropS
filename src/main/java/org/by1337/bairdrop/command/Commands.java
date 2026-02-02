@@ -411,6 +411,9 @@ public class Commands implements CommandExecutor {
                     hasEvents = true;
                 }
                 for (AirDrop air : BAirDrop.airDrops.values()) {
+                    if (air.isScheduledTimeEnabled() && !air.isAirDropStarted()) {
+                        continue;
+                    }
                     if (air.isAirDropStarted()) {
                         String nameLine = BAirDrop.getConfigMessage().getMessage("event-delay-spawned-name")
                                 .replace("{num}", String.valueOf(num++))
@@ -419,8 +422,12 @@ public class Commands implements CommandExecutor {
                         
                         String statusLine;
                         if (air.isStartCountdownAfterClick() && !air.isActivated()) {
-                            statusLine = BAirDrop.getConfigMessage().getMessage("event-delay-spawned-status-inactive")
-                                    .replace("{time}", TimeParser.formatSecondsRu(air.getAutoActivateTimer()));
+                            if (air.isAutoActivateEnabled()) {
+                                statusLine = BAirDrop.getConfigMessage().getMessage("event-delay-spawned-status-inactive")
+                                        .replace("{time}", TimeParser.formatSecondsRu(air.getAutoActivateTimer()));
+                            } else {
+                                statusLine = BAirDrop.getConfigMessage().getMessage("event-delay-spawned-status-not-activated");
+                            }
                         } else if (!air.isAirDropLocked()) {
                             statusLine = BAirDrop.getConfigMessage().getMessage("event-delay-spawned-status-open")
                                     .replace("{time}", TimeParser.formatSecondsRu(air.getTimeStop()));
@@ -440,7 +447,7 @@ public class Commands implements CommandExecutor {
                         hasEvents = true;
                         continue;
                     }
-                    if (air.isTimeCountingEnabled() && air.getTimeToStart() > 0) {
+                    if (air.isTimeCountingEnabled() && air.getTimeToStart() > 0 && !air.isScheduledTimeEnabled()) {
                         String time = TimeParser.formatSecondsRu(air.getTimeToStart());
                         String line = BAirDrop.getConfigMessage().getMessage("event-delay-line")
                                 .replace("{num}", String.valueOf(num++))

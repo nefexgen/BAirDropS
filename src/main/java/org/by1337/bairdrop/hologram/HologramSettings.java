@@ -96,6 +96,7 @@ public class HologramSettings {
     public boolean isTextShadow() { return textShadow; }
     public byte getTextOpacity() { return textOpacity; }
     public Color getBackgroundColor() { return backgroundColor; }
+    public int getBackgroundOpacity() { return backgroundOpacity; }
     public boolean isSeeThrough() { return seeThrough; }
     public float getViewRange() { return viewRange; }
     public float getScale() { return scale; }

@@ -143,7 +143,7 @@ listeners:
     description: '&6Отправляет сообщение всем о появлении аирдропа'
     event: 'START_EVENT'
     commands:
-      - '[MESSAGE_ALL] {air-name}&7 появился! Координаты: &6{x}&7, &6{y}&7, &6{z}'
+      - '[MESSAGE_ALL] {air-name}&7 появился! Координаты: &6{x} {y} {z}'
       - '[TITLE_ALL] {air-name}&7 появился!'
       - '[SOUND_ALL] BLOCK_BEACON_POWER_SELECT'
 

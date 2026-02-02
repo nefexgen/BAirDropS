@@ -14,6 +14,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -95,6 +96,16 @@ public class ChangeWorld implements Listener {
         if (e.getInventory().equals(inventory)) {
             HandlerList.unregisterAll(this);
             airDrop.save();
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    if (airDrop.getEditAirMenu() != null)
+                        airDrop.getEditAirMenu().unReg();
+                    EditAirMenu em = new EditAirMenu(airDrop);
+                    airDrop.setEditAirMenu(em);
+                    e.getPlayer().openInventory(em.getInventory());
+                }
+            }.runTaskLater(BAirDrop.getInstance(), 1L);
         }
     }
 
