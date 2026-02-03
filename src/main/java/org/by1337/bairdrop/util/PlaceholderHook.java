@@ -109,35 +109,40 @@ public class PlaceholderHook extends me.clip.placeholderapi.expansion.Placeholde
             if (args.length != 2) return "error";
             AirDrop airDrop = BAirDrop.airDrops.getOrDefault(args[1], null);
             if (airDrop == null) return "error";
-
-            if (airDrop.getAnyLoc() == null) {
+            if (!airDrop.isAirDropStarted() || airDrop.getAnyLoc() == null) {
                 return "?";
-            } else {
-                return String.valueOf(airDrop.getAnyLoc().getX()).replace(".0", "");
             }
-
+            return String.valueOf((int) airDrop.getAnyLoc().getX());
         }
         if (params.contains("y_")) { //%bairdrop_y_<air id>%
             String[] args = params.split("_");
             if (args.length != 2) return "error";
             AirDrop airDrop = BAirDrop.airDrops.getOrDefault(args[1], null);
             if (airDrop == null) return "error";
-            if (airDrop.getAnyLoc() == null) {
+            if (!airDrop.isAirDropStarted() || airDrop.getAnyLoc() == null) {
                 return "?";
-            } else {
-                return String.valueOf(airDrop.getAnyLoc().getY()).replace(".0", "");
             }
+            return String.valueOf((int) airDrop.getAnyLoc().getY());
         }
         if (params.contains("z_")) { //%bairdrop_z_<air id>%
             String[] args = params.split("_");
             if (args.length != 2) return "error";
             AirDrop airDrop = BAirDrop.airDrops.getOrDefault(args[1], null);
             if (airDrop == null) return "error";
-            if (airDrop.getAnyLoc() == null) {
+            if (!airDrop.isAirDropStarted() || airDrop.getAnyLoc() == null) {
                 return "?";
-            } else {
-                return String.valueOf(airDrop.getAnyLoc().getZ()).replace(".0", "");
             }
+            return String.valueOf((int) airDrop.getAnyLoc().getZ());
+        }
+        if (params.contains("world_")) { //%bairdrop_world_<air id>%
+            String[] args = params.split("_");
+            if (args.length != 2) return "error";
+            AirDrop airDrop = BAirDrop.airDrops.getOrDefault(args[1], null);
+            if (airDrop == null) return "error";
+            if (!airDrop.isAirDropStarted() || airDrop.getAnyLoc() == null || airDrop.getAnyLoc().getWorld() == null) {
+                return "?";
+            }
+            return airDrop.getAnyLoc().getWorld().getName();
         }
         return null;
     }
