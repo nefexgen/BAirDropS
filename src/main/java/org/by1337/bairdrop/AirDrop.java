@@ -372,6 +372,11 @@ public interface AirDrop extends Observable {
 
     void schematicsPaste(SchematicsManager manager, String name);
 
+    @Nullable
+    org.by1337.bairdrop.worldGuardHook.SavedBlocksData getSavedBlocksData();
+
+    void setSavedBlocksData(org.by1337.bairdrop.worldGuardHook.SavedBlocksData savedBlocksData);
+
     boolean isActivated();
 
     void setActivated(boolean activated);

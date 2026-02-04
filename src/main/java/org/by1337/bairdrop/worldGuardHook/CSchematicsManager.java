@@ -15,6 +15,10 @@ import com.sk89q.worldedit.session.ClipboardHolder;
 import com.sk89q.worldedit.world.block.BlockState;
 import com.sk89q.worldedit.world.block.BlockTypes;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.data.type.RespawnAnchor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.util.Vector;
 
@@ -32,14 +36,9 @@ import org.by1337.bairdrop.util.Message;
 
 public class CSchematicsManager implements SchematicsManager{
 
-    /**
-     * Sets the schematic
-     * @param name The name of the schematic in the config
-     * @param airDrop The AirDrop that spawns this schematic
-     */
     public void PasteSchematics(String name, AirDrop airDrop) {
         try {
-            if (airDrop.getEditSession() != null) {
+            if (airDrop.getSavedBlocksData() != null && !airDrop.getSavedBlocksData().isEmpty()) {
                 Message.error(BAirDrop.getConfigMessage().getMessage("schem-limit"));
                 return;
             }
@@ -77,30 +76,70 @@ public class CSchematicsManager implements SchematicsManager{
             Message.debug("paste " + file, LogLevel.LOW);
 
             File schem = BAirDrop.getiConfig().getSchematics().get(file);
-
             ClipboardFormat format = ClipboardFormats.findByFile(schem);
-
             ClipboardReader reader = format.getReader(new FileInputStream(schem));
-
-
             Clipboard clipboard = reader.read();
-
 
             Location loc = airDrop.getAirDropLocation();
             if (loc == null)
                 loc = airDrop.getFutureLocation();
             if (loc == null)
                 throw new NullPointerException();
-            com.sk89q.worldedit.world.World adaptedWorld = BukkitAdapter.adapt(loc.getWorld());
 
-            EditSession editSession = WorldEdit.getInstance().newEditSession(adaptedWorld);
+            World world = loc.getWorld();
+            com.sk89q.worldedit.world.World adaptedWorld = BukkitAdapter.adapt(world);
+
+            BlockVector3 clipboardMin = clipboard.getMinimumPoint();
+            BlockVector3 clipboardMax = clipboard.getMaximumPoint();
+            BlockVector3 origin = clipboard.getOrigin();
+
+            int pasteX = loc.getBlockX() + offsets.getBlockX();
+            int pasteY = loc.getBlockY() + offsets.getBlockY();
+            int pasteZ = loc.getBlockZ() + offsets.getBlockZ();
+
+            int minX = pasteX + (clipboardMin.x() - origin.x());
+            int minY = pasteY + (clipboardMin.y() - origin.y());
+            int minZ = pasteZ + (clipboardMin.z() - origin.z());
+            int maxX = pasteX + (clipboardMax.x() - origin.x());
+            int maxY = pasteY + (clipboardMax.y() - origin.y());
+            int maxZ = pasteZ + (clipboardMax.z() - origin.z());
+
+            SavedBlocksData savedBlocksData = new SavedBlocksData(world);
+            savedBlocksData.setBounds(minX, minY, minZ, maxX, maxY, maxZ);
+
+            for (int x = minX; x <= maxX; x++) {
+                for (int y = minY; y <= maxY; y++) {
+                    for (int z = minZ; z <= maxZ; z++) {
+                        int clipX = origin.x() + (x - pasteX);
+                        int clipY = origin.y() + (y - pasteY);
+                        int clipZ = origin.z() + (z - pasteZ);
+                        BlockVector3 clipPos = BlockVector3.at(clipX, clipY, clipZ);
+                        
+                        try {
+                            BlockState clipboardBlock = clipboard.getBlock(clipPos);
+                            boolean isAir = clipboardBlock.getBlockType() == BlockTypes.AIR 
+                                    || clipboardBlock.getBlockType() == BlockTypes.CAVE_AIR
+                                    || clipboardBlock.getBlockType() == BlockTypes.VOID_AIR;
+                            
+                            if (ignoreAirBlocks && isAir) {
+                                continue;
+                            }
+                            
+                            Location blockLoc = new Location(world, x, y, z);
+                            Block block = blockLoc.getBlock();
+                            savedBlocksData.saveBlock(blockLoc, block.getBlockData());
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
+            }
+
+            airDrop.setSavedBlocksData(savedBlocksData);
 
             if (!replaceBlocks.isEmpty()) {
-                BlockVector3 min = clipboard.getMinimumPoint();
-                BlockVector3 max = clipboard.getMaximumPoint();
-                for (int x = min.x(); x <= max.x(); x++) {
-                    for (int y = min.y(); y <= max.y(); y++) {
-                        for (int z = min.z(); z <= max.z(); z++) {
+                for (int x = clipboardMin.x(); x <= clipboardMax.x(); x++) {
+                    for (int y = clipboardMin.y(); y <= clipboardMax.y(); y++) {
+                        for (int z = clipboardMin.z(); z <= clipboardMax.z(); z++) {
                             BlockVector3 pos = BlockVector3.at(x, y, z);
                             BlockState currentBlock = clipboard.getBlock(pos);
                             BlockState replacement = replaceBlocks.get(currentBlock);
@@ -112,14 +151,28 @@ public class CSchematicsManager implements SchematicsManager{
                 }
             }
 
+            EditSession editSession = WorldEdit.getInstance().newEditSession(adaptedWorld);
             Operation operation = new ClipboardHolder(clipboard).createPaste(editSession)
-                    .to(BlockVector3.at(loc.getX() + offsets.getBlockX(), loc.getY() + offsets.getBlockY(), loc.getZ() + +offsets.getBlockZ())).ignoreAirBlocks(ignoreAirBlocks).build();
+                    .to(BlockVector3.at(pasteX, pasteY, pasteZ)).ignoreAirBlocks(ignoreAirBlocks).build();
 
             Operations.complete(operation);
             editSession.close();
 
             airDrop.setEditSession(editSession);
-            editSession.getBlockBag();
+            
+            if (!ignoreAirBlocks && airDrop.getAirDropLocation() != null) {
+                Location airDropLoc = airDrop.getAirDropLocation();
+                Material material = airDrop.isAirDropLocked() ? airDrop.getMaterialLocked() : airDrop.getMaterialUnlocked();
+                if (material != null) {
+                    Block block = airDropLoc.getBlock();
+                    block.setType(material);
+                    if (material == Material.RESPAWN_ANCHOR) {
+                        RespawnAnchor anchorData = (RespawnAnchor) block.getBlockData();
+                        anchorData.setCharges(anchorData.getMaximumCharges());
+                        block.setBlockData(anchorData);
+                    }
+                }
+            }
         } catch (IOException | WorldEditException | IllegalArgumentException | NullPointerException e) {
             e.printStackTrace();
         }

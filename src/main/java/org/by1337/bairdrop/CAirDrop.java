@@ -2,7 +2,6 @@ package org.by1337.bairdrop;
 
 import java.util.Arrays;
 import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.WorldEdit;
 import org.bukkit.*;
 import org.bukkit.block.Lidded;
 import org.bukkit.block.data.type.RespawnAnchor;
@@ -147,6 +146,7 @@ public class CAirDrop implements AirDrop, StateSerializable {
     private List<String> scheduledTimes = new ArrayList<>();
     private String lastScheduledTrigger = "";
     private org.by1337.bairdrop.bossbar.AirDropBossBar airDropBossBar;
+    private org.by1337.bairdrop.worldGuardHook.SavedBlocksData savedBlocksData = null;
 
     CAirDrop(FileConfiguration fileConfiguration, File airDropFile) {
         CAirDropInstance = this;
@@ -921,6 +921,7 @@ public class CAirDrop implements AirDrop, StateSerializable {
             return;
 
         notifyObservers(CustomEvent.END_EVENT, null);
+        schematicsUndo();
         if (airDropLocation != null)
             airDropLocation.getBlock().setType(Material.AIR);
         RegionManager.RemoveRegion(this);
@@ -1546,9 +1547,11 @@ public class CAirDrop implements AirDrop, StateSerializable {
 
     @Override
     public void schematicsUndo() {
+        if (savedBlocksData != null && !savedBlocksData.isEmpty()) {
+            savedBlocksData.restore();
+            savedBlocksData = null;
+        }
         if (editSession != null) {
-            EditSession newEditSession = WorldEdit.getInstance().newEditSession(editSession.getWorld());
-            editSession.undo(newEditSession);
             editSession.close();
             editSession = null;
         }
@@ -1562,6 +1565,16 @@ public class CAirDrop implements AirDrop, StateSerializable {
     @Override
     public void setEditSession(EditSession editSession) {
         this.editSession = editSession;
+    }
+
+    @Override
+    public org.by1337.bairdrop.worldGuardHook.SavedBlocksData getSavedBlocksData() {
+        return savedBlocksData;
+    }
+
+    @Override
+    public void setSavedBlocksData(org.by1337.bairdrop.worldGuardHook.SavedBlocksData savedBlocksData) {
+        this.savedBlocksData = savedBlocksData;
     }
 
     @Override
